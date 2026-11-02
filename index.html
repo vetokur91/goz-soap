@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1F7A68">
+<title>Göz SOAP Formu</title>
+<style>
+:root{
+  --teal:#1F7A68; --teal-soft:#E8F4F0; --red:#B0503C; --red-soft:#FBEBE6;
+  --amber:#A86B12; --amber-soft:#FDF3E1;
+  --ink:#1C1C1C; --mute:#6F675E; --line:#E7E2DB; --bg:#FFFFFF; --card:#F7F5F2; --bar:rgba(255,255,255,.96); --on:#FFFFFF;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--teal:#3FA48D;--teal-soft:#16322B;--red:#D9785F;--red-soft:#3A221B;--amber:#E0A04A;--amber-soft:#3A2C16;--ink:#ECE8E2;--mute:#A9A197;--line:#3A3631;--bg:#171615;--card:#232120;--bar:rgba(23,22,21,.96);--on:#0F1513;color-scheme:dark}}
+:root[data-theme="dark"]{--teal:#3FA48D;--teal-soft:#16322B;--red:#D9785F;--red-soft:#3A221B;--amber:#E0A04A;--amber-soft:#3A2C16;--ink:#ECE8E2;--mute:#A9A197;--line:#3A3631;--bg:#171615;--card:#232120;--bar:rgba(23,22,21,.96);--on:#0F1513;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:16px;line-height:1.4}
+.wrap{max-width:640px;margin:0 auto;padding-block:0 120px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{padding:22px 0 8px}
+header .k{font-size:12px;letter-spacing:.16em;font-weight:700;color:var(--teal)}
+header h1{font-size:26px;margin:4px 0 6px;line-height:1.15}
+header p{margin:0;color:var(--mute);font-size:14px}
+.note{background:var(--card);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--mute);margin:14px 0 4px}
+.note b{color:var(--ink)}
+
+.sec{margin-top:26px}
+.sec-h{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.badge{width:38px;height:38px;border-radius:10px;background:var(--teal);color:var(--on);font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center;flex:none}
+.sec-h h2{margin:0;font-size:19px}
+.sec-h small{display:block;color:var(--mute);font-size:13px;font-weight:400}
+
+.f{padding:14px 0;border-bottom:1px solid var(--line)}
+.f:last-child{border-bottom:0}
+.lab{font-weight:650;font-size:15px;margin-bottom:8px}
+.lab .hint{font-weight:400;color:var(--mute);font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:9px 14px;font-size:15px;cursor:pointer;user-select:none;min-height:42px}
+.chip.on{background:var(--teal);border-color:var(--teal);color:var(--on)}
+.chip.na{border-style:dashed;color:var(--amber)}
+.chip.na.on{background:var(--amber);border-color:var(--amber);color:var(--on);border-style:solid}
+input[type=text],input[type=number],textarea{width:100%;font:inherit;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg);color:var(--ink)}
+input:focus,textarea:focus{outline:none;border-color:var(--teal)}
+input:disabled{background:var(--card);color:#aaa}
+.txt{margin-top:8px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.pair label{font-size:13px;color:var(--mute);display:block;margin-bottom:4px}
+.unit{font-size:13px;color:var(--mute)}
+
+.photos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ph{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--card)}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph button{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:18px;line-height:1}
+.add{aspect-ratio:1;border:2px dashed var(--line);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--teal);font-weight:650;font-size:14px;cursor:pointer;text-align:center;gap:4px}
+.add span{font-size:30px;line-height:1}
+
+.fixed{background:var(--card);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--ink)}
+.fixed ol{margin:6px 0 0;padding-left:20px}
+.fixed li{margin:3px 0}
+
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--bar);backdrop-filter:blur(6px);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+.bar .in{max-width:640px;margin:0 auto;display:flex;gap:10px}
+.btn{flex:1;border:0;border-radius:14px;padding:15px 16px;font:inherit;font-weight:750;font-size:16px;cursor:pointer}
+.btn.p{background:var(--teal);color:var(--on)}
+.btn.s{background:var(--card);color:var(--ink);flex:0 0 auto}
+
+/* sonuç ekranı */
+#out{display:none}
+#out.show{display:block}
+.warn{background:var(--amber-soft);border-radius:12px;padding:12px 14px;margin:16px 0;font-size:14px}
+.warn b{color:var(--amber)}
+.ok{background:var(--teal-soft);border-radius:12px;padding:12px 14px;margin:16px 0;font-size:14px;color:var(--teal);font-weight:650}
+.prev{white-space:pre-wrap;background:var(--card);border-radius:12px;padding:14px;font-size:13.5px;line-height:1.45;max-height:46vh;overflow:auto;border:1px solid var(--line)}
+.acts{display:grid;gap:10px;margin-top:14px}
+.acts .btn{width:100%}
+.steps{font-size:14px;color:var(--mute);margin:14px 0 0;padding-left:20px}
+.steps li{margin:4px 0}
+#card{width:100%;border-radius:12px;border:1px solid var(--line);margin-top:14px;display:none}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+.toast.show{opacity:1}
+footer{margin-top:30px;font-size:12px;color:var(--mute);text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap" id="form">
+  <header>
+    <div class="k">GÖZ KONSÜLTASYONU</div>
+    <h1>SOAP Formu</h1>
+    <p>Fotoğrafı ekleyin, bulguları işaretleyin. Form, yapay zekaya gönderilecek metni sizin için hazırlar.</p>
+  </header>
+  <div class="note">🔒 Bilgiler telefonunuzdan çıkmaz. <b>Sahip adı, telefon, çip no yazmayın.</b> Fotoğrafta etiket ya da dosya numarası görünmesin.</div>
+
+  <section class="sec">
+    <div class="sec-h"><div class="badge">📷</div><h2>Fotoğraflar<small>En fazla 3 · Gözü kadrajı dolduracak şekilde, net çekin</small></h2></div>
+    <div class="photos" id="photos"></div>
+    <input type="file" id="file" accept="image/*" multiple hidden>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><div class="badge">S</div><h2>Hasta ve öykü<small>Signalment ve sahibin anlattıkları</small></h2></div>
+    <div id="S"></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><div class="badge">O</div><h2>Muayene ve testler<small>Yapmadığınız testi “Yapılmadı” olarak işaretleyin</small></h2></div>
+    <div id="O"></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><div class="badge">A</div><h2>Değerlendirme<small>Bilerek boş bırakılır</small></h2></div>
+    <div class="fixed">Tahmininizi yazmayın. Yapay zeka sizin tahmininize göre cevabını değiştirebilir.</div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><div class="badge">P</div><h2>Yapay zekadan istenenler<small>Metne otomatik eklenir</small></h2></div>
+    <div class="fixed"><ol id="plist"></ol></div>
+  </section>
+
+  <footer>Yapay zekanın cevabı tanı değildir; karar hekimindir.<br>Doç. Dr. Sıtkıcan Okur · TuVECCA 2026</footer>
+</div>
+
+<div class="wrap" id="out">
+  <header>
+    <div class="k">HAZIR</div>
+    <h1>Yapay zekaya gönderin</h1>
+    <p>Fotoğraflar ve metin birlikte gider. Uygulama metni almazsa yapıştırmanız yeterli; metin panoya kopyalanır.</p>
+  </header>
+  <div id="miss"></div>
+  <div class="acts">
+    <button class="btn p" id="share">📤 Yapay zekaya gönder</button>
+    <button class="btn s" id="copy" style="flex:1">📋 Metni kopyala</button>
+    <button class="btn s" id="savecard" style="flex:1">🗂️ SOAP kartını kaydet</button>
+  </div>
+  <ol class="steps">
+    <li>“Gönder”e basın, ChatGPT, Gemini ya da Claude’u seçin.</li>
+    <li>Metin gelmediyse mesaj kutusuna basılı tutup <b>Yapıştır</b>’ı seçin.</li>
+    <li>Paylaş çalışmazsa: kartı kaydedin, uygulamada fotoğrafları ekleyin, metni yapıştırın.</li>
+  </ol>
+  <h2 style="font-size:16px;margin:22px 0 8px">Gönderilecek metin</h2>
+  <div class="prev" id="prev"></div>
+  <img id="card" alt="SOAP kartı">
+</div>
+
+<div class="bar"><div class="in" id="barIn">
+  <button class="btn s" id="reset" type="button">Temizle</button>
+  <button class="btn p" id="go">Hazırla →</button>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- Soru tanımları ---------- */
+const NA = 'Yapılmadı';
+const S_FIELDS = [
+  {id:'tur', l:'Tür', t:'one', o:['Kedi','Köpek','Diğer']},
+  {id:'irk', l:'Irk', t:'text', ph:'ör. Tekir, Golden Retriever'},
+  {id:'yas', l:'Yaş', t:'one', o:['<1 yıl','1–7 yıl','>7 yıl'], txt:'Tam yaş (isteğe bağlı)'},
+  {id:'cins', l:'Cinsiyet', t:'one', o:['Erkek','Dişi']},
+  {id:'kisir', l:'Kısırlaştırılmış', t:'one', o:['Evet','Hayır','Bilinmiyor']},
+  {id:'goz', l:'Etkilenen göz', t:'one', o:['Sağ','Sol','İki göz']},
+  {id:'sikayet', l:'Şikayet', h:'birden fazla seçilebilir', t:'many',
+    o:['Kızarıklık','Akıntı','Gözü kısma','Sulanma','Bulanıklık','Gözde kan','Şişlik','Göz öne fırlamış','Görmüyor gibi','Gözünü kaşıyor'], txt:'Diğer'},
+  {id:'sure', l:'Süre', t:'one', o:['<24 saat','1–7 gün','1–4 hafta','>1 ay']},
+  {id:'bas', l:'Başlangıç', t:'one', o:['Ani','Yavaş yavaş','Bilinmiyor']},
+  {id:'travma', l:'Travma öyküsü', t:'one', o:['Var','Yok','Bilinmiyor'], txt:'Varsa nasıl?'},
+  {id:'genel', l:'Genel durum', h:'birden fazla seçilebilir', t:'many',
+    o:['Normal','Halsiz','İştahsız','Kusma / ishal','Hapşırma / burun akıntısı','Öksürük / solunum','Ateş','Kilo kaybı','Çok su içme / idrar'], txt:'Diğer'},
+  {id:'yasam', l:'Yaşam', t:'one', o:['Ev içi','Dışarı çıkıyor','Barınak / sokak']},
+  {id:'asi', l:'Aşılar', t:'one', o:['Tam','Eksik','Bilinmiyor']},
+  {id:'ilac', l:'Kullanılan / verilmiş ilaçlar', t:'text', ph:'ör. 3 gündür antibiyotikli damla'},
+  {id:'ek', l:'Bilinen hastalıklar / ek öykü', t:'text', ph:'ör. kronik böbrek hastalığı, yeni sahiplenildi'}
+];
+const O_FIELDS = [
+  {id:'tehdit', l:'Tehdit (menace) refleksi', t:'one', o:['Var','Zayıf','Yok',NA], test:1},
+  {id:'pupil', l:'Pupillalar', t:'one', o:['Normal','Midriyazis','Miyozis','Anizokori','Değerlendirilemedi'], test:1},
+  {id:'pir', l:'Pupilla ışık refleksi', t:'one', o:['Var','Zayıf','Yok',NA], test:1},
+  {id:'agri', l:'Ağrı (blefarospazm)', t:'one', o:['Var','Yok']},
+  {id:'akinti', l:'Akıntı', t:'one', o:['Yok','Seröz','Mukoid','Pürülan','Kanlı']},
+  {id:'kapak', l:'Göz kapakları / 3. göz kapağı', h:'birden fazla seçilebilir', t:'many',
+    o:['Normal','Şişlik / kitle','Entropion','Ektropion','3. kapak protrüzyonu','Kapak kapanmıyor'], txt:'Diğer'},
+  {id:'konj', l:'Konjunktiva / sklera', h:'birden fazla seçilebilir', t:'many',
+    o:['Normal','Hiperemi','Kemozis','Episkleral konjesyon','Kanama'], txt:'Diğer'},
+  {id:'kornea', l:'Kornea', h:'birden fazla seçilebilir', t:'many',
+    o:['Saydam','Ödem / mavi bulanıklık','Damarlanma','Pigmentasyon','Ülser görünümü','Erime (melting)','Siyah plak','Yabancı cisim'], txt:'Diğer'},
+  {id:'onkamara', l:'Ön kamara', t:'many', h:'birden fazla seçilebilir',
+    o:['Normal','Hifema','Hipopiyon','Bulanık (flare)','Lens ön kamarada','Değerlendirilemedi']},
+  {id:'iris', l:'İris / lens', h:'birden fazla seçilebilir', t:'many',
+    o:['Normal','İris renk değişimi','İris kitle','Katarakt','Lens yer değiştirmiş','Değerlendirilemedi'], txt:'Diğer'},
+  {id:'schirmer', l:'Schirmer gözyaşı testi', t:'pair', u:'mm/dk', test:1},
+  {id:'flor', l:'Floresein', t:'one', o:['Negatif','Pozitif',NA], test:1, txt:'Pozitifse nerede, ne kadar?'},
+  {id:'gib', l:'Göz içi basıncı (GİB)', t:'pair', u:'mmHg', test:1},
+  {id:'fundus', l:'Fundus', t:'one', o:['Normal','Anormal','Görülemedi',NA], test:1, txt:'Anormalse ne görüldü?'},
+  {id:'mukoza', l:'Mukozalar', t:'one', o:['Normal','Soluk','Sarı (ikterik)','Peteşi / ekimoz','Bakılmadı']},
+  {id:'tansiyon', l:'Sistolik kan basıncı', t:'num', u:'mmHg', test:1},
+  {id:'kan', l:'Kan testleri', t:'one', o:['Yapıldı',NA], test:1, txt:'Önemli sonuçlar (ör. trombosit, HCT, kreatinin)'},
+  {id:'diger', l:'Diğer bulgular', t:'text', ph:'ör. mandibular lenf nodu büyük, ateş 39,8 °C'}
+];
+const P_LIST = [
+  'ACİL: Acil müdahale ya da sevk gerekiyorsa tek cümle. Gerekmiyorsa sadece "Yok" yaz.',
+  'ÖNCE YAP: En fazla 2 test (eksik testler dahil); her biri tek satır gerekçe.',
+  'AYIRICI TANI: En olası 4 tanı; her biri tek satır, "lehine: … / aleyhine: …" biçiminde.',
+  'KAÇIN: Bu aşamada kaçınılacak en fazla 3 ilaç veya işlem, tek satır.',
+  'EMİN DEĞİLİM: Varsa tek cümle.'
+];
+
+/* ---------- Durum ---------- */
+const st = {};       // id -> string | Set
+const tx = {};       // id -> ek metin
+const pr = {};       // pair/num -> {r,l,na} / {v,na}
+let photos = [];     // {blob,url}
+
+const $ = s => document.querySelector(s);
+const el = (tag, cls, html) => { const e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; };
+
+/* ---------- Form çizimi ---------- */
+function buildField(f){
+  const box = el('div','f');
+  box.appendChild(el('div','lab', f.l + (f.h?` <span class="hint">· ${f.h}</span>`:'')));
+  if(f.t==='one' || f.t==='many'){
+    const ch = el('div','chips');
+    f.o.forEach(o=>{
+      const c = el('button','chip'+(o===NA?' na':''), o); c.type='button';
+      c.onclick = ()=>{
+        if(f.t==='one'){
+          st[f.id] = st[f.id]===o ? undefined : o;
+          ch.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on', x.textContent===st[f.id]));
+        } else {
+          const s = st[f.id] || (st[f.id]=new Set());
+          const solo = ['Normal','Saydam'];
+          if(s.has(o)) s.delete(o);
+          else { if(solo.includes(o)) s.clear(); else solo.forEach(z=>s.delete(z)); s.add(o); }
+          ch.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on', s.has(x.textContent)));
+        }
+      };
+      ch.appendChild(c);
+    });
+    box.appendChild(ch);
+  }
+  if(f.t==='text'){
+    const i = el('input'); i.type='text'; i.placeholder=f.ph||''; i.oninput=()=>tx[f.id]=i.value; box.appendChild(i);
+  }
+  if(f.t==='pair' || f.t==='num'){
+    pr[f.id] = {};
+    const naBtn = el('button','chip na', NA); naBtn.type='button';
+    const inputs = [];
+    const g = el('div', f.t==='pair'?'pair':'');
+    if(f.t==='num') g.style.marginTop='8px';
+    const sides = f.t==='pair' ? [['r','Sağ göz'],['l','Sol göz']] : [['v','Değer']];
+    sides.forEach(([k,lab])=>{
+      const w = el('div');
+      if(f.t==='pair') w.appendChild(el('label','',lab+` <span class="unit">(${f.u})</span>`));
+      const i = el('input'); i.type='number'; i.inputMode='decimal'; i.placeholder = f.t==='num' ? f.u : '';
+      i.oninput=()=>pr[f.id][k]=i.value; inputs.push(i); w.appendChild(i); g.appendChild(w);
+    });
+    naBtn.onclick=()=>{ pr[f.id].na=!pr[f.id].na; naBtn.classList.toggle('on',pr[f.id].na); inputs.forEach(i=>i.disabled=pr[f.id].na); };
+    const ch = el('div','chips'); ch.appendChild(naBtn); box.appendChild(ch); box.appendChild(g);
+  }
+  if(f.txt){
+    const i = el('input','txt'); i.type='text'; i.placeholder=f.txt; i.oninput=()=>tx[f.id]=i.value; box.appendChild(i);
+  }
+  return box;
+}
+S_FIELDS.forEach(f=>$('#S').appendChild(buildField(f)));
+O_FIELDS.forEach(f=>$('#O').appendChild(buildField(f)));
+P_LIST.forEach(p=>$('#plist').appendChild(el('li','',p)));
+
+/* ---------- Fotoğraflar ---------- */
+function drawPhotos(){
+  const g=$('#photos'); g.innerHTML='';
+  photos.forEach((p,i)=>{
+    const d=el('div','ph'); d.innerHTML=`<img src="${p.url}" alt="">`;
+    const b=el('button','','×'); b.type='button'; b.onclick=()=>{URL.revokeObjectURL(p.url); photos.splice(i,1); drawPhotos();};
+    d.appendChild(b); g.appendChild(d);
+  });
+  if(photos.length<3){
+    const a=el('div','add','<span>＋</span>Fotoğraf ekle'); a.onclick=()=>$('#file').click(); g.appendChild(a);
+  }
+}
+async function shrink(file){
+  const img = await new Promise((res,rej)=>{const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=URL.createObjectURL(file);});
+  const M=2048, k=Math.min(1, M/Math.max(img.naturalWidth,img.naturalHeight));
+  const c=document.createElement('canvas'); c.width=Math.round(img.naturalWidth*k); c.height=Math.round(img.naturalHeight*k);
+  c.getContext('2d').drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(img.src);
+  return await new Promise(r=>c.toBlob(r,'image/jpeg',0.9));
+}
+$('#file').onchange = async e=>{
+  for(const f of [...e.target.files].slice(0, 3-photos.length)){
+    try{ const b=await shrink(f); photos.push({blob:b,url:URL.createObjectURL(b)}); }catch(_){ toast('Fotoğraf okunamadı'); }
+  }
+  e.target.value=''; drawPhotos();
+};
+drawPhotos();
+
+/* ---------- Metin üretimi ---------- */
+function val(f){
+  let v='';
+  if(f.t==='one') v = st[f.id]||'';
+  if(f.t==='many') v = st[f.id] ? [...st[f.id]].join(', ') : '';
+  if(f.t==='text') v = (tx[f.id]||'').trim();
+  if(f.t==='pair'){ const p=pr[f.id]; if(p.na) v=NA; else if(p.r||p.l) v=`Sağ ${p.r||'—'}, Sol ${p.l||'—'} ${f.u}`; }
+  if(f.t==='num'){ const p=pr[f.id]; if(p.na) v=NA; else if(p.v) v=`${p.v} ${f.u}`; }
+  const extra = f.t!=='text' && f.txt ? (tx[f.id]||'').trim() : '';
+  if(extra) v = v ? `${v} (${extra})` : extra;
+  return v;
+}
+function collect(){
+  const S={}, O={}; S_FIELDS.forEach(f=>S[f.id]=val(f)); O_FIELDS.forEach(f=>O[f.id]=val(f));
+  const notDone=[], blank=[];
+  O_FIELDS.filter(f=>f.test).forEach(f=>{
+    const v=O[f.id];
+    if(!v) blank.push(f.l); else if(v.startsWith(NA)) notDone.push(f.l);
+  });
+  return {S,O,notDone,blank};
+}
+function line(label,v){ return v ? `• ${label}: ${v}\n` : ''; }
+function buildText(d){
+  const {S,O}=d;
+  const hasta=[S.tur, S.irk, S.yas, S.cins && S.cins.toLowerCase(), S.kisir==='Evet'?'kısırlaştırılmış':S.kisir==='Hayır'?'kısırlaştırılmamış':''].filter(Boolean).join(', ');
+  let t = 'Veteriner hekimim. Aşağıda bir göz vakasının bulguları var. Sana tanı sormuyorum; gözden kaçırdığım bir şey olmasın istiyorum. Kendi tahminimi bilerek yazmadım; beni bir tanıya yönlendirmeye çalışma. ';
+  t += photos.length ? `Ekteki ${photos.length} fotoğrafı da değerlendir.\n\n` : 'Fotoğraf eklemedim.\n\n';
+  t += 'S – HASTA VE ÖYKÜ\n';
+  t += line('Hasta', hasta);
+  t += line('Etkilenen göz', S.goz);
+  t += line('Şikayet', S.sikayet);
+  t += line('Süre', S.sure);
+  t += line('Başlangıç', S.bas);
+  t += line('Travma', S.travma);
+  t += line('Genel durum', S.genel);
+  t += line('Yaşam', S.yasam);
+  t += line('Aşılar', S.asi);
+  t += line('Kullanılan ilaçlar', S.ilac);
+  t += line('Bilinen hastalıklar / ek öykü', S.ek);
+  t += '\nO – MUAYENE VE TESTLER\n';
+  O_FIELDS.forEach(f=>{ t += line(f.l, O[f.id]); });
+  const miss=[...d.notDone, ...d.blank];
+  if(miss.length) t += `\nYapılmamış ya da sonucu yazılmamış testler: ${miss.join(', ')}\n`;
+  t += '\nA – DEĞERLENDİRME\nBilerek boş bırakıyorum.\n';
+  t += '\nP – SENDEN İSTEDİKLERİM\n';
+  P_LIST.forEach((p,i)=>{ t += `${i+1}. ${p}\n`; });
+  t += '\nCEVAP KURALLARI\n';
+  t += '• Yazdığım bulguları tekrar etme, özetleme, onaylama.\n';
+  t += '• Fotoğrafı tarif etme. Sadece benim yazmadığım bir bulgu görüyorsan tek satırla "EK BULGU" başlığında yaz.\n';
+  t += '• Giriş, kapanış ve genel uyarı cümlesi yazma.\n';
+  t += '• Sadece yukarıdaki başlıkları kullan. Toplam 200 kelimeyi geçme.';
+  // numaraları düzelt (2. madde atlandıysa)
+  let n=0; t=t.replace(/^\d+\. /gm,()=>`${++n}. `);
+  return t;
+}
+
+/* ---------- SOAP kartı (görsel) ---------- */
+async function buildCard(d, text){
+  const W=1080, P=56, c=document.createElement('canvas'), x=c.getContext('2d');
+  const font=(w,s)=>`${w} ${s}px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif`;
+  const body = text.split('\nA – ')[0].split('\n').slice(2); // S ve O kısmı
+  const imgs = await Promise.all(photos.map(p=>new Promise(r=>{const i=new Image(); i.onload=()=>r(i); i.src=p.url;})));
+  // yükseklik ölçümü
+  x.font=font(400,30);
+  const wrap=(s,max)=>{const out=[];let cur='';s.split(' ').forEach(w=>{const tt=cur?cur+' '+w:w; if(x.measureText(tt).width>max&&cur){out.push(cur);cur=w;}else cur=tt;}); out.push(cur); return out;};
+  const lines=[]; body.forEach(l=>{ if(!l.trim()){lines.push({t:'',gap:1});return;} if(/^[SO] – /.test(l)) lines.push({t:l,h:1}); else wrap(l,W-2*P).forEach(w=>lines.push({t:w})); });
+  const phH = imgs.length? Math.round((W-2*P-(imgs.length-1)*16)/imgs.length) : 0;
+  const H = 170 + (imgs.length? phH+40:0) + lines.reduce((a,l)=>a+(l.h?58:l.gap?16:42),0) + 110;
+  c.width=W; c.height=H;
+  x.fillStyle='#fff'; x.fillRect(0,0,W,H);
+  x.fillStyle='#1F7A68'; x.font=font(700,24); x.fillText('GÖZ KONSÜLTASYONU · SOAP KARTI',P,70);
+  x.fillStyle='#1C1C1C'; x.font=font(800,44); x.fillText(new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'}),P,128);
+  let y=170;
+  imgs.forEach((im,i)=>{
+    const dx=P+i*(phH+16), s=Math.min(im.naturalWidth,im.naturalHeight);
+    x.save(); x.beginPath(); x.roundRect? x.roundRect(dx,y,phH,phH,20) : x.rect(dx,y,phH,phH); x.clip();
+    x.drawImage(im,(im.naturalWidth-s)/2,(im.naturalHeight-s)/2,s,s,dx,y,phH,phH); x.restore();
+  });
+  if(imgs.length) y+=phH+40;
+  lines.forEach(l=>{
+    if(l.gap){y+=16;return;}
+    if(l.h){ x.fillStyle='#1F7A68'; x.font=font(800,32); x.fillText(l.t,P,y+36); y+=58; return; }
+    x.fillStyle='#1C1C1C'; x.font=font(400,30); x.fillText(l.t,P,y+30); y+=42;
+  });
+  x.fillStyle='#8a8278'; x.font=font(400,22);
+  x.fillText('A: bilerek boş bırakıldı · Yapay zekanın cevabı tanı değildir; karar hekimindir.',P,H-50);
+  return await new Promise(r=>c.toBlob(r,'image/png'));
+}
+
+/* ---------- Eylemler ---------- */
+let TEXT='', CARD=null;
+function toast(m){const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2200);}
+async function copyText(){
+  try{ await navigator.clipboard.writeText(TEXT); return true; }
+  catch(_){ const ta=el('textarea'); ta.value=TEXT; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); let ok=false; try{ok=document.execCommand('copy');}catch(e){} ta.remove(); return ok; }
+}
+$('#go').onclick = async ()=>{
+  const d=collect();
+  if(!d.S.tur){ toast('En azından türü seçin'); window.scrollTo({top:$('#S').offsetTop-80,behavior:'smooth'}); return; }
+  TEXT=buildText(d);
+  $('#prev').textContent=TEXT;
+  const m=[...d.notDone,...d.blank];
+  $('#miss').innerHTML = m.length
+    ? `<div class="warn"><b>⚠️ Eksik testler:</b> ${m.join(', ')}.<br>Göndermeden önce yapabiliyorsanız yapın. Yapamıyorsanız yapay zeka hangisinin önce gerektiğini söyleyecek.</div>`
+    : `<div class="ok">✓ Temel göz testlerinin hepsi girildi.</div>`;
+  if(!photos.length) $('#miss').innerHTML += `<div class="warn"><b>📷 Fotoğraf yok.</b> Fotoğrafsız da gönderebilirsiniz ama yapay zeka yalnızca yazdıklarınızı değerlendirir.</div>`;
+  CARD=await buildCard(d,TEXT);
+  const ci=$('#card'); ci.src=URL.createObjectURL(CARD); ci.style.display='block';
+  $('#form').style.display='none'; $('#out').classList.add('show');
+  $('#barIn').innerHTML='<button class="btn s" id="back" style="flex:1">← Forma dön</button>';
+  $('#back').onclick=()=>{ $('#out').classList.remove('show'); $('#form').style.display='block'; restoreBar(); };
+  window.scrollTo(0,0);
+};
+function restoreBar(){
+  $('#barIn').innerHTML='<button class="btn s" id="reset">Temizle</button><button class="btn p" id="go2">Hazırla →</button>';
+  $('#go2').onclick=()=>$('#go').onclick(); $('#reset').onclick=resetAll;
+}
+$('#share').onclick = async ()=>{
+  const copied = await copyText();
+  const files = photos.map((p,i)=>new File([p.blob],`goz_${i+1}.jpg`,{type:'image/jpeg'}));
+  const data = {text:TEXT, files};
+  try{
+    if(files.length && navigator.canShare && navigator.canShare(data)) await navigator.share(data);
+    else if(navigator.share) await navigator.share({text:TEXT});
+    else { toast(copied?'Metin kopyalandı. Yapay zeka uygulamasına yapıştırın.':'Paylaş desteklenmiyor; metni kopyalayın.'); return; }
+    if(copied) toast('Metin panoda da var; gerekirse yapıştırın.');
+  }catch(e){ if(e.name!=='AbortError') toast(copied?'Paylaşılamadı; metin kopyalandı.':'Paylaşılamadı.'); }
+};
+$('#copy').onclick = async ()=> toast(await copyText() ? 'Metin kopyalandı' : 'Kopyalanamadı; metni basılı tutup seçin');
+$('#savecard').onclick = async ()=>{
+  const f=new File([CARD],'SOAP_karti.png',{type:'image/png'});
+  try{ if(navigator.canShare && navigator.canShare({files:[f]})){ await navigator.share({files:[f]}); return; } }catch(e){ if(e.name==='AbortError') return; }
+  const a=el('a'); a.href=URL.createObjectURL(CARD); a.download='SOAP_karti.png'; document.body.appendChild(a); a.click(); a.remove();
+};
+function resetAll(){ const b=$('#reset'); if(!b.dataset.ask){ b.dataset.ask=1; b.textContent='Emin misiniz?'; setTimeout(()=>{b.dataset.ask='';b.textContent='Temizle';},3000); return; } location.reload(); }
+$('#reset').onclick=resetAll;
+</script>
+
+</body>
+</html>
