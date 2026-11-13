@@ -79,6 +79,35 @@ input:disabled{background:var(--card);color:#aaa}
 .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
 .toast.show{opacity:1}
 footer{margin-top:30px;font-size:12px;color:var(--mute);text-align:center}
+.chip.sm{min-height:34px;padding:6px 12px;font-size:14px}
+.eyerow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
+[hidden]{display:none!important}
+.labup{margin-top:10px;display:grid;gap:6px}
+.labup .hint{font-size:12.5px;color:var(--mute)}
+.lablist{display:grid;gap:6px}
+.lablist:empty{display:none}
+.labitem{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:14px}
+.labitem button{border:0;background:none;color:var(--mute);font-size:20px;line-height:1;cursor:pointer;padding:0 4px}
+.labup .chip{justify-self:start}
+.eyerow .hint{font-size:13px;color:var(--mute);margin-right:4px}
+.rule{border-radius:12px;padding:12px 14px;margin:12px 0;font-size:14px;border-left:4px solid}
+.rule b{display:block;margin-bottom:2px}
+.rule.c{background:var(--red-soft);border-color:var(--red)}.rule.c b{color:var(--red)}
+.rule.w{background:var(--amber-soft);border-color:var(--amber)}.rule.w b{color:var(--amber)}
+.rule.i{background:var(--teal-soft);border-color:var(--teal)}.rule.i b{color:var(--teal)}
+.btn.mic{flex:0 0 56px;font-size:20px;padding:0}
+.btn.mic.rec{background:var(--red);color:#fff;animation:nabiz 1.2s infinite}
+@keyframes nabiz{50%{opacity:.55}}
+.ses{position:fixed;left:12px;right:12px;top:max(12px,env(safe-area-inset-top,0px));z-index:20;max-width:616px;margin:0 auto;background:var(--bg);border:1.5px solid var(--teal);border-radius:16px;padding:14px;box-shadow:0 12px 32px rgba(0,0,0,.25);max-height:80vh;overflow:auto}
+.ses-h{display:flex;align-items:center;gap:8px;font-size:16px}
+.ses .dot{width:10px;height:10px;border-radius:50%;background:var(--red);animation:nabiz 1s infinite}
+.ses-t{background:var(--card);border-radius:10px;padding:10px 12px;margin:10px 0;font-size:15px;min-height:44px;overflow-wrap:anywhere}
+.ses .hint{font-size:12.5px;color:var(--mute);margin:6px 0}
+.ses-l{margin:6px 0;padding-left:18px;font-size:14px}
+.ses-b{display:flex;gap:8px;margin-top:10px}
+.f.flash{animation:parla 2.2s ease-out}
+@keyframes parla{0%{background:var(--teal-soft)}100%{background:transparent}}
+@media (prefers-reduced-motion:reduce){.btn.mic.rec,.ses .dot,.f.flash{animation:none}}
 </style>
 </head>
 <body>
@@ -86,9 +115,9 @@ footer{margin-top:30px;font-size:12px;color:var(--mute);text-align:center}
   <header>
     <div class="k">GÖZ KONSÜLTASYONU</div>
     <h1>SOAP Formu</h1>
-    <p>Fotoğrafı ekleyin, bulguları işaretleyin. Form, yapay zekaya gönderilecek metni sizin için hazırlar.</p>
+    <p>Fotoğrafı ekleyin, bulguları işaretleyin ya da 🎤 düğmesine basıp söyleyin. Form, yapay zekaya gönderilecek metni sizin için hazırlar.</p>
   </header>
-  <div class="note">🔒 Bilgiler telefonunuzdan çıkmaz. <b>Sahip adı, telefon, çip no yazmayın.</b> Fotoğrafta etiket ya da dosya numarası görünmesin.</div>
+  <div class="note">🔒 Form bilgileri telefonunuzdan çıkmaz (sesli girişte ses, telefonun ses tanıma hizmetiyle yazıya çevrilir). <b>Sahip adı, telefon, çip no yazmayın.</b> Fotoğrafta etiket ya da dosya numarası görünmesin.</div>
 
   <section class="sec">
     <div class="sec-h"><div class="badge">📷</div><h2>Fotoğraflar<small>En fazla 3 · Gözü kadrajı dolduracak şekilde, net çekin</small></h2></div>
@@ -128,6 +157,7 @@ footer{margin-top:30px;font-size:12px;color:var(--mute);text-align:center}
   <div id="miss"></div>
   <div class="acts">
     <button class="btn p" id="share">📤 Yapay zekaya gönder</button>
+    <button class="btn s" id="second" style="flex:1">🔁 Kör ikinci görüş</button>
     <button class="btn s" id="copy" style="flex:1">📋 Metni kopyala</button>
     <button class="btn s" id="savecard" style="flex:1">🗂️ SOAP kartını kaydet</button>
   </div>
@@ -135,6 +165,7 @@ footer{margin-top:30px;font-size:12px;color:var(--mute);text-align:center}
     <li>“Gönder”e basın, ChatGPT, Gemini ya da Claude’u seçin.</li>
     <li>Metin gelmediyse mesaj kutusuna basılı tutup <b>Yapıştır</b>’ı seçin.</li>
     <li>Paylaş çalışmazsa: kartı kaydedin, uygulamada fotoğrafları ekleyin, metni yapıştırın.</li>
+    <li><b>Kör ikinci görüş:</b> aynı metni başka bir yapay zekada yeni bir sohbette açın. İlk cevabı göstermeyin; iki cevabı siz karşılaştırın.</li>
   </ol>
   <h2 style="font-size:16px;margin:22px 0 8px">Gönderilecek metin</h2>
   <div class="prev" id="prev"></div>
@@ -142,8 +173,7 @@ footer{margin-top:30px;font-size:12px;color:var(--mute);text-align:center}
 </div>
 
 <div class="bar"><div class="in" id="barIn">
-  <button class="btn s" id="reset" type="button">Temizle</button>
-  <button class="btn p" id="go">Hazırla →</button>
+
 </div></div>
 <div class="toast" id="toast"></div>
 
@@ -170,30 +200,35 @@ const S_FIELDS = [
   {id:'ek', l:'Bilinen hastalıklar / ek öykü', t:'text', ph:'ör. kronik böbrek hastalığı, yeni sahiplenildi'}
 ];
 const O_FIELDS = [
+  {id:'imkan', l:'Klinikte olmayanlar', h:'varsa işaretleyin; yapay zekaya yalnızca yapabileceklerinizi sorar', t:'many',
+    o:['Tonometre','Oftalmoskop','Biyomikroskop / büyüteç','Floresein','Kan testi']},
   {id:'tehdit', l:'Tehdit (menace) refleksi', t:'one', o:['Var','Zayıf','Yok',NA], test:1},
   {id:'pupil', l:'Pupillalar', t:'one', o:['Normal','Midriyazis','Miyozis','Anizokori','Değerlendirilemedi'], test:1},
   {id:'pir', l:'Pupilla ışık refleksi', t:'one', o:['Var','Zayıf','Yok',NA], test:1},
   {id:'agri', l:'Ağrı (blefarospazm)', t:'one', o:['Var','Yok']},
   {id:'akinti', l:'Akıntı', t:'one', o:['Yok','Seröz','Mukoid','Pürülan','Kanlı']},
-  {id:'kapak', l:'Göz kapakları / 3. göz kapağı', h:'birden fazla seçilebilir', t:'many',
+  {id:'kapak', l:'Göz kapakları / 3. göz kapağı', h:'birden fazla seçilebilir', t:'many', eye:1,
     o:['Normal','Şişlik / kitle','Entropion','Ektropion','3. kapak protrüzyonu','Kapak kapanmıyor'], txt:'Diğer'},
-  {id:'konj', l:'Konjunktiva / sklera', h:'birden fazla seçilebilir', t:'many',
+  {id:'konj', l:'Konjunktiva / sklera', h:'birden fazla seçilebilir', t:'many', eye:1,
     o:['Normal','Hiperemi','Kemozis','Episkleral konjesyon','Kanama'], txt:'Diğer'},
-  {id:'kornea', l:'Kornea', h:'birden fazla seçilebilir', t:'many',
+  {id:'kornea', l:'Kornea', h:'birden fazla seçilebilir', t:'many', eye:1,
     o:['Saydam','Ödem / mavi bulanıklık','Damarlanma','Pigmentasyon','Ülser görünümü','Erime (melting)','Siyah plak','Yabancı cisim'], txt:'Diğer'},
-  {id:'onkamara', l:'Ön kamara', t:'many', h:'birden fazla seçilebilir',
+  {id:'onkamara', l:'Ön kamara', t:'many', h:'birden fazla seçilebilir', eye:1,
     o:['Normal','Hifema','Hipopiyon','Bulanık (flare)','Lens ön kamarada','Değerlendirilemedi']},
-  {id:'iris', l:'İris / lens', h:'birden fazla seçilebilir', t:'many',
+  {id:'iris', l:'İris / lens', h:'birden fazla seçilebilir', t:'many', eye:1,
     o:['Normal','İris renk değişimi','İris kitle','Katarakt','Lens yer değiştirmiş','Değerlendirilemedi'], txt:'Diğer'},
   {id:'schirmer', l:'Schirmer gözyaşı testi', t:'pair', u:'mm/dk', test:1},
   {id:'flor', l:'Floresein', t:'one', o:['Negatif','Pozitif',NA], test:1, txt:'Pozitifse nerede, ne kadar?'},
   {id:'gib', l:'Göz içi basıncı (GİB)', t:'pair', u:'mmHg', test:1},
   {id:'fundus', l:'Fundus', t:'one', o:['Normal','Anormal','Görülemedi',NA], test:1, txt:'Anormalse ne görüldü?'},
+  {id:'gozdisi', l:'Gözün dışında', h:'yüz, burun, ağız, deri; fotoğrafın kenarına da bakın', t:'many',
+    o:['Normal','Burun lezyonu','Ağız / dudak lezyonu','Deri lezyonu / tüy kaybı','Yüzde şişlik','Lenf nodu büyük'], txt:'Diğer'},
   {id:'mukoza', l:'Mukozalar', t:'one', o:['Normal','Soluk','Sarı (ikterik)','Peteşi / ekimoz','Bakılmadı']},
   {id:'tansiyon', l:'Sistolik kan basıncı', t:'num', u:'mmHg', test:1},
   {id:'kan', l:'Kan testleri', t:'one', o:['Yapıldı',NA], test:1, txt:'Önemli sonuçlar (ör. trombosit, HCT, kreatinin)'},
   {id:'diger', l:'Diğer bulgular', t:'text', ph:'ör. mandibular lenf nodu büyük, ateş 39,8 °C'}
 ];
+const SOLO = ['Normal','Saydam'];
 const P_LIST = [
   'ACİL: Acil müdahale ya da sevk gerekiyorsa tek cümle. Gerekmiyorsa sadece "Yok" yaz.',
   'ÖNCE YAP: En fazla 2 test (eksik testler dahil); her biri tek satır gerekçe.',
@@ -201,67 +236,103 @@ const P_LIST = [
   'KAÇIN: Bu aşamada kaçınılacak en fazla 3 ilaç veya işlem, tek satır.',
   'EMİN DEĞİLİM: Varsa tek cümle.'
 ];
+const P_KISITLI = [
+  'ACİL: Acil müdahale ya da sevk gerekiyorsa tek cümle. Gerekmiyorsa sadece "Yok" yaz.',
+  'YAPMA: Bu bulgularla kesinlikle yapmamam gereken en fazla 3 ilaç veya işlem, tek satır.',
+  'ELİMDEKİYLE: Elimdeki imkanlarla yapabileceğim en fazla 2 şey; her biri tek satır gerekçe.',
+  'SEVK: Hangi bulguda ya da gelişmede, ne kadar sürede sevk etmeliyim?',
+  'EMİN DEĞİLİM: Varsa tek cümle.'
+];
 
 /* ---------- Durum ---------- */
 const st = {};       // id -> string | Set
 const tx = {};       // id -> ek metin
 const pr = {};       // pair/num -> {r,l,na} / {v,na}
+const UI = {};       // id -> {ch, inp, txt, ins, na, eye}
 let photos = [];     // {blob,url}
+let labs = [];       // kan testi: {file, ad, tip:'img'|'pdf'}
 
 const $ = s => document.querySelector(s);
 const el = (tag, cls, html) => { const e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; };
+const ALL = () => [...S_FIELDS, ...O_FIELDS];
+const F = id => ALL().find(f=>f.id===id);
 
 /* ---------- Form çizimi ---------- */
+function sync(id){
+  const f=F(id), u=UI[id]; if(!u) return;
+  if(u.ch) u.ch.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on', f.t==='one' ? x.textContent===st[id] : !!(st[id]&&st[id].has(x.textContent))));
+  if(u.inp) u.inp.value = tx[id]||'';
+  if(u.txt) u.txt.value = tx[id]||'';
+  if(u.ins){ const p=pr[id]||{}; u.ins.forEach(([k,i])=>{ i.value=p[k]||''; i.disabled=!!p.na; }); u.na.classList.toggle('on',!!p.na); }
+  if(u.eye) u.eye.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on', x.textContent===st[id+'_g']));
+}
+function changed(id){
+  if(id==='goz'||(F(id)||{}).eye) eyeRows();
+  if(id==='imkan') drawP();
+}
+// mode: 'toggle' (dokunma) ya da 'set' (ses)
+function pick(id,o,mode){
+  const f=F(id);
+  if(f.t==='one'){ st[id] = (mode==='toggle' && st[id]===o) ? undefined : o; }
+  else {
+    const s = st[id] || (st[id]=new Set());
+    if(mode==='toggle' && s.has(o)) s.delete(o);
+    else { if(SOLO.includes(o)) s.clear(); else SOLO.forEach(z=>s.delete(z)); s.add(o); }
+  }
+  sync(id); changed(id);
+}
 function buildField(f){
-  const box = el('div','f');
+  const box = el('div','f'); const u = UI[f.id] = {};
   box.appendChild(el('div','lab', f.l + (f.h?` <span class="hint">· ${f.h}</span>`:'')));
   if(f.t==='one' || f.t==='many'){
-    const ch = el('div','chips');
-    f.o.forEach(o=>{
-      const c = el('button','chip'+(o===NA?' na':''), o); c.type='button';
-      c.onclick = ()=>{
-        if(f.t==='one'){
-          st[f.id] = st[f.id]===o ? undefined : o;
-          ch.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on', x.textContent===st[f.id]));
-        } else {
-          const s = st[f.id] || (st[f.id]=new Set());
-          const solo = ['Normal','Saydam'];
-          if(s.has(o)) s.delete(o);
-          else { if(solo.includes(o)) s.clear(); else solo.forEach(z=>s.delete(z)); s.add(o); }
-          ch.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on', s.has(x.textContent)));
-        }
-      };
-      ch.appendChild(c);
-    });
+    const ch = u.ch = el('div','chips');
+    f.o.forEach(o=>{ const c = el('button','chip'+(o===NA?' na':''), o); c.type='button'; c.onclick = ()=>pick(f.id,o,'toggle'); ch.appendChild(c); });
     box.appendChild(ch);
   }
   if(f.t==='text'){
-    const i = el('input'); i.type='text'; i.placeholder=f.ph||''; i.oninput=()=>tx[f.id]=i.value; box.appendChild(i);
+    const i = u.inp = el('input'); i.type='text'; i.placeholder=f.ph||''; i.oninput=()=>tx[f.id]=i.value; box.appendChild(i);
   }
   if(f.t==='pair' || f.t==='num'){
     pr[f.id] = {};
-    const naBtn = el('button','chip na', NA); naBtn.type='button';
-    const inputs = [];
+    const naBtn = u.na = el('button','chip na', NA); naBtn.type='button';
+    u.ins = [];
     const g = el('div', f.t==='pair'?'pair':'');
     if(f.t==='num') g.style.marginTop='8px';
     const sides = f.t==='pair' ? [['r','Sağ göz'],['l','Sol göz']] : [['v','Değer']];
     sides.forEach(([k,lab])=>{
       const w = el('div');
       if(f.t==='pair') w.appendChild(el('label','',lab+` <span class="unit">(${f.u})</span>`));
-      const i = el('input'); i.type='number'; i.inputMode='decimal'; i.placeholder = f.t==='num' ? f.u : '';
-      i.oninput=()=>pr[f.id][k]=i.value; inputs.push(i); w.appendChild(i); g.appendChild(w);
+      const i = el('input'); i.type='text'; i.inputMode='decimal'; i.placeholder = f.t==='num' ? f.u : '';
+      i.oninput=()=>pr[f.id][k]=i.value; u.ins.push([k,i]); w.appendChild(i); g.appendChild(w);
     });
-    naBtn.onclick=()=>{ pr[f.id].na=!pr[f.id].na; naBtn.classList.toggle('on',pr[f.id].na); inputs.forEach(i=>i.disabled=pr[f.id].na); };
+    naBtn.onclick=()=>{ pr[f.id].na=!pr[f.id].na; sync(f.id); };
     const ch = el('div','chips'); ch.appendChild(naBtn); box.appendChild(ch); box.appendChild(g);
   }
   if(f.txt){
-    const i = el('input','txt'); i.type='text'; i.placeholder=f.txt; i.oninput=()=>tx[f.id]=i.value; box.appendChild(i);
+    const i = u.txt = el('input','txt'); i.type='text'; i.placeholder=f.txt; i.oninput=()=>tx[f.id]=i.value; box.appendChild(i);
+  }
+  if(f.id==='kan'){
+    const w = el('div','labup');
+    const lst = u.labs = el('div','lablist'); w.appendChild(lst);
+    const b = el('button','chip sm','📎 Sonucu ekle (fotoğraf ya da PDF)'); b.type='button'; b.onclick=()=>$('#labfile').click(); u.labBtn=b; w.appendChild(b);
+    w.appendChild(el('div','hint','Sahip adı, telefon ve klinik bilgisi görünmesin. PDF\'te görünüyorsa sonucun fotoğrafını çekip kırpın.'));
+    box.appendChild(w);
+  }
+  if(f.eye){
+    const e = u.eye = el('div','eyerow'); e.hidden=true;
+    e.appendChild(el('span','hint','Hangi gözde?'));
+    ['Sağ','Sol','İkisi'].forEach(o=>{ const c=el('button','chip sm',o); c.type='button'; c.onclick=()=>{ st[f.id+'_g'] = st[f.id+'_g']===o?undefined:o; sync(f.id); }; e.appendChild(c); });
+    box.appendChild(e);
   }
   return box;
 }
+function eyeRows(){ O_FIELDS.filter(f=>f.eye).forEach(f=>{ UI[f.id].eye.hidden = st.goz!=='İki göz' || !(st[f.id] && [...st[f.id]].some(x=>!SOLO.includes(x)&&x!=='Değerlendirilemedi')); }); }
+function kisitli(){ return st.imkan && st.imkan.size ? [...st.imkan] : null; }
+function drawP(){ const L=kisitli()?P_KISITLI:P_LIST; const ol=$('#plist'); ol.innerHTML=''; L.forEach(p=>ol.appendChild(el('li','',p))); }
 S_FIELDS.forEach(f=>$('#S').appendChild(buildField(f)));
 O_FIELDS.forEach(f=>$('#O').appendChild(buildField(f)));
-P_LIST.forEach(p=>$('#plist').appendChild(el('li','',p)));
+drawP();
+
 
 /* ---------- Fotoğraflar ---------- */
 function drawPhotos(){
@@ -275,12 +346,12 @@ function drawPhotos(){
     const a=el('div','add','<span>＋</span>Fotoğraf ekle'); a.onclick=()=>$('#file').click(); g.appendChild(a);
   }
 }
-async function shrink(file){
+async function shrink(file,M0,Q0){
   const img = await new Promise((res,rej)=>{const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=URL.createObjectURL(file);});
-  const M=2048, k=Math.min(1, M/Math.max(img.naturalWidth,img.naturalHeight));
+  const M=M0||2048, k=Math.min(1, M/Math.max(img.naturalWidth,img.naturalHeight));
   const c=document.createElement('canvas'); c.width=Math.round(img.naturalWidth*k); c.height=Math.round(img.naturalHeight*k);
   c.getContext('2d').drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(img.src);
-  return await new Promise(r=>c.toBlob(r,'image/jpeg',0.9));
+  return await new Promise(r=>c.toBlob(r,'image/jpeg',Q0||0.9));
 }
 $('#file').onchange = async e=>{
   for(const f of [...e.target.files].slice(0, 3-photos.length)){
@@ -289,8 +360,30 @@ $('#file').onchange = async e=>{
   e.target.value=''; drawPhotos();
 };
 drawPhotos();
+function drawLabs(){
+  const u=UI.kan; if(!u) return; u.labs.innerHTML='';
+  labs.forEach((L,i)=>{ const r=el('div','labitem'); r.appendChild(el('span','',(L.tip==='pdf'?'📄 ':'🧾 ')+L.ad)); const x=el('button','','×'); x.type='button'; x.setAttribute('aria-label','Kaldır'); x.onclick=()=>{ labs.splice(i,1); drawLabs(); }; r.appendChild(x); u.labs.appendChild(r); });
+  u.labBtn.hidden = labs.length>=2;
+}
+const lf=el('input'); lf.type='file'; lf.id='labfile'; lf.accept='image/*,application/pdf,.pdf'; lf.multiple=true; lf.hidden=true; document.body.appendChild(lf);
+lf.onchange = async e=>{
+  for(const f of [...e.target.files].slice(0, 2-labs.length)){
+    try{
+      if(f.type==='application/pdf' || /\.pdf$/i.test(f.name)){
+        if(f.size>15*1024*1024){ toast('PDF çok büyük (en fazla 15 MB)'); continue; }
+        labs.push({file:new File([f],`kan_testi_${labs.length+1}.pdf`,{type:'application/pdf'}), ad:'PDF · '+Math.max(1,Math.round(f.size/1024))+' KB', tip:'pdf'});
+      } else {
+        const b=await shrink(f,2400,0.92); labs.push({file:new File([b],`kan_testi_${labs.length+1}.jpg`,{type:'image/jpeg'}), ad:'Fotoğraf', tip:'img'});
+      }
+    }catch(_){ toast('Dosya okunamadı'); }
+  }
+  e.target.value=''; drawLabs();
+  if(labs.length && st.kan!=='Yapıldı') pick('kan','Yapıldı','set');
+};
+
 
 /* ---------- Metin üretimi ---------- */
+const EYE_TXT = {'Sağ':'sağ gözde','Sol':'sol gözde','İkisi':'iki gözde'};
 function val(f){
   let v='';
   if(f.t==='one') v = st[f.id]||'';
@@ -300,6 +393,7 @@ function val(f){
   if(f.t==='num'){ const p=pr[f.id]; if(p.na) v=NA; else if(p.v) v=`${p.v} ${f.u}`; }
   const extra = f.t!=='text' && f.txt ? (tx[f.id]||'').trim() : '';
   if(extra) v = v ? `${v} (${extra})` : extra;
+  if(f.eye && v && st.goz==='İki göz' && st[f.id+'_g'] && !SOLO.includes(v)) v += ` (${EYE_TXT[st[f.id+'_g']]})`;
   return v;
 }
 function collect(){
@@ -311,12 +405,41 @@ function collect(){
   });
   return {S,O,notDone,blank};
 }
+
+/* ---------- Göndermeden önce kurallar (yapay zekasız) ---------- */
+const has = (id,o) => !!(st[id] && (st[id] instanceof Set ? st[id].has(o) : st[id]===o));
+const yok = id => { const f=F(id); if(f.t==='pair'||f.t==='num'){ const p=pr[id]; return p.na || !(p.r||p.l||p.v); } return !st[id] || st[id]===NA; };
+const STEROID = /steroid|kortizon|kortikost|deksa|dexa|prednizol|prednisol|betametazon|hidrokortizon|flor(o)?metolon|maxitrol|tobradex|kombine/i;
+function kurallar(){
+  const out=[], push=(lvl,b,m)=>out.push({lvl,b,m});
+  const ilac=(tx.ilac||'')+' '+(tx.ek||'');
+  const kedi=st.tur==='Kedi', yasli=st.yas==='>7 yıl';
+  const korneaRisk = has('kornea','Ülser görünümü')||has('kornea','Erime (melting)')||has('kornea','Yabancı cisim')||has('agri','Var')||has('sikayet','Gözü kısma');
+  if(STEROID.test(ilac) && (yok('flor')||has('flor','Pozitif')))
+    push('c', has('flor','Pozitif')?'Floresein pozitif gözde steroid':'Floresein yapılmadan steroidli damla', has('flor','Pozitif')?'Ülserli korneada steroid ülseri derinleştirebilir, erimeye (melting) yol açabilir.':'Fotoğrafta görünmeyen bir ülser olabilir. Steroidden önce floresein yapın.');
+  else if(yok('flor') && korneaRisk)
+    push('w','Floresein yapın','Ağrı, göz kısma ya da kornea bulgusu var; ülser fotoğrafta görünmeyebilir.');
+  if(yok('gib') && (has('pupil','Midriyazis')||has('konj','Episkleral konjesyon')||has('kornea','Ödem / mavi bulanıklık')||has('sikayet','Görmüyor gibi')||has('iris','Lens yer değiştirmiş')||has('onkamara','Lens ön kamarada')))
+    push('c','Glokom dışlanmadı','Geniş pupilla, episkleral konjesyon, kornea ödemi, görme kaybı ya da lens yer değişimi var; GİB ölçülmeden glokom dışlanamaz.'+(has('imkan','Tonometre')?' Tonometre yoksa aynı gün sevki düşünün.':''));
+  if(has('onkamara','Hifema') && yok('kan'))
+    push('w','Hifemada kan testi ve tansiyon','Trombosit, pıhtılaşma ve kan basıncı travma dışındaki nedenleri gösterebilir.');
+  if(kedi && has('iris','İris renk değişimi'))
+    push('w','Kedide iris rengi değişimi','Sonradan gelişen renk değişimi çoğu zaman üveittir; zararsız heterokromi diye geçmeyin.');
+  if((kedi||yasli) && yok('tansiyon') && (has('fundus','Anormal')||has('pupil','Midriyazis')||has('sikayet','Görmüyor gibi')||has('onkamara','Hifema')))
+    push('w','Kan basıncını ölçün','Görme kaybı, geniş pupilla, hifema ya da fundus bulgusu sistemik hipertansiyona bağlı olabilir.');
+  if(!st.gozdisi)
+    push('i','Gözün dışına da baktınız mı?','Kapak çevresi, burun, ağız ve deri sistemik bir hastalığın ipucunu taşıyabilir. Fotoğrafın kenarlarına da bakın.');
+  return out;
+}
+
 function line(label,v){ return v ? `• ${label}: ${v}\n` : ''; }
 function buildText(d){
-  const {S,O}=d;
+  const {S,O}=d; const K=kisitli();
   const hasta=[S.tur, S.irk, S.yas, S.cins && S.cins.toLowerCase(), S.kisir==='Evet'?'kısırlaştırılmış':S.kisir==='Hayır'?'kısırlaştırılmamış':''].filter(Boolean).join(', ');
   let t = 'Veteriner hekimim. Aşağıda bir göz vakasının bulguları var. Sana tanı sormuyorum; gözden kaçırdığım bir şey olmasın istiyorum. Kendi tahminimi bilerek yazmadım; beni bir tanıya yönlendirmeye çalışma. ';
-  t += photos.length ? `Ekteki ${photos.length} fotoğrafı da değerlendir.\n\n` : 'Fotoğraf eklemedim.\n\n';
+  if(K) t += `Klinikte şunlar yok: ${K.join(', ').toLowerCase()}. Tanı koyma; elimdeki imkanlarla ne yapacağımı, neyi yapmamam gerektiğini ve ne zaman sevk edeceğimi söyle. `;
+  t += photos.length ? `Ekteki ${photos.length} göz fotoğrafını da değerlendir. ` : 'Göz fotoğrafı eklemedim. ';
+  t += labs.length ? `Ayrıca ${labs.length===1?'kan testi sonucu':labs.length+' kan testi sonucu'} ekte (${labs.map(L=>L.tip==='pdf'?'PDF':'fotoğraf').join(', ')}); göz bulgularıyla ilişkili olabilecek değerleri değerlendir.\n\n` : '\n\n';
   t += 'S – HASTA VE ÖYKÜ\n';
   t += line('Hasta', hasta);
   t += line('Etkilenen göz', S.goz);
@@ -330,21 +453,20 @@ function buildText(d){
   t += line('Kullanılan ilaçlar', S.ilac);
   t += line('Bilinen hastalıklar / ek öykü', S.ek);
   t += '\nO – MUAYENE VE TESTLER\n';
-  O_FIELDS.forEach(f=>{ t += line(f.l, O[f.id]); });
+  O_FIELDS.filter(f=>f.id!=='imkan').forEach(f=>{ t += line(f.l, O[f.id]); });
   const miss=[...d.notDone, ...d.blank];
   if(miss.length) t += `\nYapılmamış ya da sonucu yazılmamış testler: ${miss.join(', ')}\n`;
   t += '\nA – DEĞERLENDİRME\nBilerek boş bırakıyorum.\n';
   t += '\nP – SENDEN İSTEDİKLERİM\n';
-  P_LIST.forEach((p,i)=>{ t += `${i+1}. ${p}\n`; });
+  (K?P_KISITLI:P_LIST).forEach((p,i)=>{ t += `${i+1}. ${p}\n`; });
   t += '\nCEVAP KURALLARI\n';
   t += '• Yazdığım bulguları tekrar etme, özetleme, onaylama.\n';
-  t += '• Fotoğrafı tarif etme. Sadece benim yazmadığım bir bulgu görüyorsan tek satırla "EK BULGU" başlığında yaz.\n';
+  t += '• Fotoğrafı tarif etme. Benim yazmadığım bir bulgu görüyorsan, özellikle gözün dışında (kapak çevresi, burun, ağız, deri), tek satırla "EK BULGU" başlığında yaz.\n';
   t += '• Giriş, kapanış ve genel uyarı cümlesi yazma.\n';
   t += '• Sadece yukarıdaki başlıkları kullan. Toplam 200 kelimeyi geçme.';
-  // numaraları düzelt (2. madde atlandıysa)
-  let n=0; t=t.replace(/^\d+\. /gm,()=>`${++n}. `);
   return t;
 }
+
 
 /* ---------- SOAP kartı (görsel) ---------- */
 async function buildCard(d, text){
@@ -375,49 +497,59 @@ async function buildCard(d, text){
     x.fillStyle='#1C1C1C'; x.font=font(400,30); x.fillText(l.t,P,y+30); y+=42;
   });
   x.fillStyle='#8a8278'; x.font=font(400,22);
-  x.fillText('A: bilerek boş bırakıldı · Yapay zekanın cevabı tanı değildir; karar hekimindir.',P,H-50);
+  x.fillText((labs.length?`Kan testi: ekte ${labs.length} dosya · `:'')+'A: bilerek boş bırakıldı · Karar hekimindir.',P,H-50);
   return await new Promise(r=>c.toBlob(r,'image/png'));
 }
 
+
 /* ---------- Eylemler ---------- */
 let TEXT='', CARD=null;
-function toast(m){const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2200);}
+function toast(m){const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2400);}
 async function copyText(){
   try{ await navigator.clipboard.writeText(TEXT); return true; }
   catch(_){ const ta=el('textarea'); ta.value=TEXT; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); let ok=false; try{ok=document.execCommand('copy');}catch(e){} ta.remove(); return ok; }
 }
-$('#go').onclick = async ()=>{
+const ICON={c:'⛔',w:'⚠️',i:'👁️'};
+async function hazirla(){
   const d=collect();
   if(!d.S.tur){ toast('En azından türü seçin'); window.scrollTo({top:$('#S').offsetTop-80,behavior:'smooth'}); return; }
   TEXT=buildText(d);
   $('#prev').textContent=TEXT;
+  const R=kurallar();
+  let h=R.map(r=>`<div class="rule ${r.lvl}"><b>${ICON[r.lvl]} ${r.b}</b>${r.m}</div>`).join('');
   const m=[...d.notDone,...d.blank];
-  $('#miss').innerHTML = m.length
-    ? `<div class="warn"><b>⚠️ Eksik testler:</b> ${m.join(', ')}.<br>Göndermeden önce yapabiliyorsanız yapın. Yapamıyorsanız yapay zeka hangisinin önce gerektiğini söyleyecek.</div>`
+  h += m.length
+    ? `<div class="warn"><b>Eksik testler:</b> ${m.join(', ')}.<br>Göndermeden önce yapabiliyorsanız yapın. Yapamıyorsanız yapay zeka hangisinin önce gerektiğini söyleyecek.</div>`
     : `<div class="ok">✓ Temel göz testlerinin hepsi girildi.</div>`;
-  if(!photos.length) $('#miss').innerHTML += `<div class="warn"><b>📷 Fotoğraf yok.</b> Fotoğrafsız da gönderebilirsiniz ama yapay zeka yalnızca yazdıklarınızı değerlendirir.</div>`;
+  if(labs.length) h += `<div class="ok">🧾 Kan testi sonucu ekte (${labs.length} dosya); fotoğraflarla birlikte gönderilecek.</div>`;
+  if(!photos.length) h += `<div class="warn"><b>📷 Fotoğraf yok.</b> Fotoğrafsız da gönderebilirsiniz ama yapay zeka yalnızca yazdıklarınızı değerlendirir.</div>`;
+  $('#miss').innerHTML=h;
   CARD=await buildCard(d,TEXT);
   const ci=$('#card'); ci.src=URL.createObjectURL(CARD); ci.style.display='block';
   $('#form').style.display='none'; $('#out').classList.add('show');
   $('#barIn').innerHTML='<button class="btn s" id="back" style="flex:1">← Forma dön</button>';
   $('#back').onclick=()=>{ $('#out').classList.remove('show'); $('#form').style.display='block'; restoreBar(); };
   window.scrollTo(0,0);
-};
-function restoreBar(){
-  $('#barIn').innerHTML='<button class="btn s" id="reset">Temizle</button><button class="btn p" id="go2">Hazırla →</button>';
-  $('#go2').onclick=()=>$('#go').onclick(); $('#reset').onclick=resetAll;
 }
-$('#share').onclick = async ()=>{
+function restoreBar(){
+  $('#barIn').innerHTML='<button class="btn s mic" id="mic" type="button" aria-label="Sesle doldur">🎤</button><button class="btn s" id="reset" type="button">Temizle</button><button class="btn p" id="go">Hazırla →</button>';
+  $('#go').onclick=hazirla; $('#reset').onclick=resetAll; $('#mic').onclick=sesBaslat;
+}
+async function paylas(ikinci){
   const copied = await copyText();
-  const files = photos.map((p,i)=>new File([p.blob],`goz_${i+1}.jpg`,{type:'image/jpeg'}));
-  const data = {text:TEXT, files};
+  const gf = photos.map((p,i)=>new File([p.blob],`goz_${i+1}.jpg`,{type:'image/jpeg'}));
+  let files = [...gf, ...labs.map(L=>L.file)];
+  let data = {text:TEXT, files}, eksik=false;
+  if(files.length && navigator.canShare && !navigator.canShare(data) && labs.some(L=>L.tip==='pdf')){ files=[...gf, ...labs.filter(L=>L.tip!=='pdf').map(L=>L.file)]; data={text:TEXT, files}; eksik=true; }
   try{
-    if(files.length && navigator.canShare && navigator.canShare(data)) await navigator.share(data);
+    if(files.length && navigator.canShare && navigator.canShare(data)){ await navigator.share(data); if(eksik){ toast('Bu telefon PDF paylaşmıyor: PDF\'i uygulamaya ayrıca ekleyin.'); return; } }
     else if(navigator.share) await navigator.share({text:TEXT});
     else { toast(copied?'Metin kopyalandı. Yapay zeka uygulamasına yapıştırın.':'Paylaş desteklenmiyor; metni kopyalayın.'); return; }
-    if(copied) toast('Metin panoda da var; gerekirse yapıştırın.');
+    toast(ikinci?'Yeni bir sohbette açın; ilk cevabı göstermeyin.':copied?'Metin panoda da var; gerekirse yapıştırın.':'Gönderildi');
   }catch(e){ if(e.name!=='AbortError') toast(copied?'Paylaşılamadı; metin kopyalandı.':'Paylaşılamadı.'); }
-};
+}
+$('#share').onclick = ()=>paylas(false);
+$('#second').onclick = ()=>paylas(true);
 $('#copy').onclick = async ()=> toast(await copyText() ? 'Metin kopyalandı' : 'Kopyalanamadı; metni basılı tutup seçin');
 $('#savecard').onclick = async ()=>{
   const f=new File([CARD],'SOAP_karti.png',{type:'image/png'});
@@ -425,7 +557,180 @@ $('#savecard').onclick = async ()=>{
   const a=el('a'); a.href=URL.createObjectURL(CARD); a.download='SOAP_karti.png'; document.body.appendChild(a); a.click(); a.remove();
 };
 function resetAll(){ const b=$('#reset'); if(!b.dataset.ask){ b.dataset.ask=1; b.textContent='Emin misiniz?'; setTimeout(()=>{b.dataset.ask='';b.textContent='Temizle';},3000); return; } location.reload(); }
-$('#reset').onclick=resetAll;
+
+
+/* ---------- Sesle doldurma (kurallarla; yapay zeka kullanılmaz) ---------- */
+const NUMW={'sıfır':0,'bir':1,'iki':2,'üç':3,'dört':4,'beş':5,'altı':6,'yedi':7,'sekiz':8,'dokuz':9,'on':10,'yirmi':20,'otuz':30,'kırk':40,'elli':50,'altmış':60,'yetmiş':70,'seksen':80,'doksan':90};
+function sayilar(s){
+  // "on sekiz" → 18, "iki yüz on" → 210, "üç buçuk" → 3,5
+  const w=s.split(/\s+/), o=[]; let i=0;
+  while(i<w.length){
+    let j=i, tot=0, cur=0, any=false;
+    while(j<w.length){
+      const x=w[j];
+      if(x in NUMW){ cur+=NUMW[x]; any=true; j++; continue; }
+      if(x==='yüz'&&(any||(j+1<w.length&&(w[j+1] in NUMW)))){ cur=(cur||1)*100; any=true; j++; continue; }
+      if(x==='bin'&&any){ tot+=(cur||1)*1000; cur=0; j++; continue; }
+      break;
+    }
+    if(any){ let n=tot+cur; if(w[j]==='buçuk'){ n+=0.5; j++; } o.push(String(n).replace('.',',')); i=j; }
+    else { o.push(w[i]); i++; }
+  }
+  return o.join(' ');
+}
+function norm(t){
+  let s=String(t||'').toLocaleLowerCase('tr').replace(/[.;:!?()"“”]/g,' ').replace(/(\d),(\d)/g,'$1#$2').replace(/,/g,' , ').replace(/#/g,',').replace(/\s+/g,' ').trim();
+  s=sayilar(s);
+  return ' '+s+' ';
+}
+const NEG=/^\s*(?:\S+\s+)?(yok|yoktu|değil|olmadan|görülmedi|görmedim|saptanmadı)\b/;
+function each(s,re,fn){ const g=new RegExp(re.source,'g'+(re.flags.includes('i')?'i':'')); let m; while((m=g.exec(s))){ const after=s.slice(m.index+m[0].length,m.index+m[0].length+22); fn(m,NEG.test(after)); if(m[0]==='') g.lastIndex++; } }
+const DRUGS=[['antibiyotik','antibiyotik'],['steroid','steroid'],['kortizon','kortizon'],['deksametazon','deksametazon'],['prednizolon','prednizolon'],['tobramisin','tobramisin'],['kloramfenikol','kloramfenikol'],['ofloksasin','ofloksasin'],['siklosporin','siklosporin'],['takrolimus','takrolimus'],['atropin','atropin'],['suni gözyaşı','suni gözyaşı'],['antiviral','antiviral'],['famsiklovir','famsiklovir'],['meloksikam','meloksikam'],['kombine','kombine damla'],['dorzolamid','dorzolamid'],['latanoprost','latanoprost'],['timolol','timolol']];
+const BREEDS=['tekir','van kedisi','ankara kedisi','british shorthair','british','scottish fold','scottish','iran kedisi','iran','siyam','sfenks','golden retriever','golden','labrador','pug','shih tzu','yorkshire','terrier','poodle','kaniş','kangal','cocker','husky','maltese','maltız','pekinez','chihuahua','fransız bulldog','bulldog','alman çoban','rottweiler','pomeranian','beagle','cavalier','boxer','doberman','malinois','akita','çivava'];
+function cap(x){ return x.split(' ').map(w=>w.charAt(0).toLocaleUpperCase('tr')+w.slice(1)).join(' '); }
+
+function sesCoz(raw){
+  const s=norm(raw), done=[], hit=new Set();
+  const set=(id,o)=>{ if(!F(id)) return; pick(id,o,'set'); hit.add(id); done.push(`${F(id).l}: ${o}`); };
+  const add=(id,o,neg)=>{ if(!neg) set(id,o); };
+  const setTx=(id,v,lab)=>{ tx[id]=v; sync(id); hit.add(id); done.push(`${lab||F(id).l}: ${v}`); };
+  const setPair=(id,r,l,na)=>{ const p=pr[id]; if(na){ p.na=true; } else { p.na=false; if(r!=null) p.r=r; if(l!=null) p.l=l; } sync(id); hit.add(id); done.push(`${F(id).l}: ${na?NA:`sağ ${p.r||'—'}, sol ${p.l||'—'}`}`); };
+  const NOTDONE=/(yapılmadı|yapmadım|yapamadım|ölçülmedi|ölçmedim|ölçemedim|bakılmadı|bakmadım|yok)\b/;
+
+  // Tür
+  { const k=s.search(/ kedi/), d=s.search(/ köpe[kğ]/); if(k>=0&&(d<0||k<d)) set('tur','Kedi'); else if(d>=0) set('tur','Köpek'); }
+  // Irk
+  { const b=BREEDS.find(x=>s.includes(' '+x)); const m=s.match(/ ırk[ıi]?\s+([a-zçğıöşü]+(?:\s[a-zçğıöşü]+)?)/);
+    if(b) setTx('irk',cap(b)); else if(m) setTx('irk',cap(m[1])); }
+  // Yaş
+  { let m=s.match(/ (\d+(?:,\d+)?)\s*(?:yaş|yaşında|yaşlı|yıllık)/), y=null, lab='';
+    if(m){ y=parseFloat(m[1].replace(',','.')); lab=m[1]+' yaş'; }
+    else if((m=s.match(/ (\d+)\s*aylık/))){ y=+m[1]/12; lab=m[1]+' aylık'; }
+    else if((m=s.match(/ (\d+)\s*haftalık/))){ y=+m[1]/52; lab=m[1]+' haftalık'; }
+    if(y!=null){ set('yas', y<1?'<1 yıl':y<=7?'1–7 yıl':'>7 yıl'); tx.yas=lab; sync('yas'); } }
+  // Cinsiyet, kısırlık
+  if(/ dişi/.test(s)) set('cins','Dişi'); else if(/ erkek/.test(s)) set('cins','Erkek');
+  if(/kısır değil|kısırlaştırılmamış|kısırlaştırılmadı/.test(s)) set('kisir','Hayır');
+  else if(/ kısır|kastre|kısırlaştırıl/.test(s)) set('kisir','Evet');
+  // Etkilenen göz
+  if(/(iki|2|her (iki|2)) göz|bilateral|(iki|2) taraflı/.test(s)) set('goz','İki göz');
+  else if(/ sağ göz/.test(s)) set('goz','Sağ'); else if(/ sol göz/.test(s)) set('goz','Sol');
+  // Şikayet
+  [[/kızarık/,'Kızarıklık'],[/(?<!burun )akıntı(?!sı)/,'Akıntı'],[/kısıyor|kısma|kısık/,'Gözü kısma'],[/sulan/,'Sulanma'],[/bulanık/,'Bulanıklık'],[/gözde kan|gözünde kan/,'Gözde kan'],[/şişlik|şişmiş|şiş /,'Şişlik'],[/fırla/,'Göz öne fırlamış'],[/görmüyor|görme kayb|kör /,'Görmüyor gibi'],[/kaşı/,'Gözünü kaşıyor']]
+    .forEach(([re,o])=>each(s,re,(m,neg)=>{ if(/burun|burn|dudak|ağz|deri/.test(s.slice(Math.max(0,m.index-12),m.index))) return; add('sikayet',o,neg); }));
+  // Süre ve başlangıç
+  { let m;
+    if(/ bugün| bu sabah| sabahtan beri| birkaç saat/.test(s)) set('sure','<24 saat');
+    else if((m=s.match(/ (\d+)\s*(saat|gün|hafta|ay)(?:d[ıiuü]r|t[ıiuü]r|\s+önce|\s+boyunca|\s+oldu)/))){ const n=+m[1], u=m[2];
+      set('sure', u==='saat'?(n<24?'<24 saat':'1–7 gün'):u==='gün'?(n<=7?'1–7 gün':n<=30?'1–4 hafta':'>1 ay'):u==='hafta'?(n<=4?'1–4 hafta':'>1 ay'):'>1 ay'); }
+    else if(/ dünden beri| dün /.test(s)) set('sure','1–7 gün'); }
+  if(/ aniden| ani | birden/.test(s)) set('bas','Ani'); else if(/yavaş yavaş|giderek|zamanla/.test(s)) set('bas','Yavaş yavaş');
+  // Travma
+  if(/travma (öyküsü )?yok/.test(s)) set('travma','Yok');
+  else { const m=s.match(/(travma|darbe|çarp|kavga|pençe|tırmalan|düştü|düşme)/); if(m){ set('travma','Var'); if(m[1]!=='travma'){ tx.travma=m[1]; sync('travma'); } } }
+  // Genel durum
+  if(/genel durum\S* (iyi|normal)/.test(s)) set('genel','Normal');
+  [[/halsiz/,'Halsiz'],[/iştahsız|iştahı yok|yemiyor/,'İştahsız'],[/kus|ishal/,'Kusma / ishal'],[/hapşır|burun akıntı/,'Hapşırma / burun akıntısı'],[/öksür|solunum güçlüğ/,'Öksürük / solunum'],[/ ateş/,'Ateş'],[/kilo kayb|zayıfla/,'Kilo kaybı'],[/çok su|su içi/,'Çok su içme / idrar']]
+    .forEach(([re,o])=>each(s,re,(m,neg)=>add('genel',o,neg)));
+  // Yaşam, aşı
+  if(/barınak|sokak/.test(s)) set('yasam','Barınak / sokak'); else if(/dışarı çık|bahçe/.test(s)) set('yasam','Dışarı çıkıyor'); else if(/ev içi|evde yaşıyor|evde kalıyor|ev kedisi/.test(s)) set('yasam','Ev içi');
+  if(/aşısız|aşı\S* (eksik|yok|yapılmamış)/.test(s)) set('asi','Eksik'); else if(/aşı\S* (tam|yapılmış|var)|aşılı/.test(s)) set('asi','Tam');
+  // İlaçlar
+  { const f=DRUGS.filter(([k])=>s.includes(k)).map(([,v])=>v); if(f.length){ const v=[...new Set(f)].join(', ')+(s.includes('damla')&&!f.some(x=>x.includes('damla'))?' (damla)':''); setTx('ilac', tx.ilac?tx.ilac+'; '+v:v); } }
+
+  // Klinikte olmayanlar
+  [[/(tonometre|tonopen|tonovet)\S*\s+yok/,'Tonometre'],[/oftalmoskop\S*\s+yok/,'Oftalmoskop'],[/(biyomikroskop|slit lamp|büyüteç)\S*\s+yok/,'Biyomikroskop / büyüteç'],[/floresein\S*\s+yok/,'Floresein'],[/kan testi\S*\s+(yok|yapamıyoruz)/,'Kan testi']]
+    .forEach(([re,o])=>{ if(re.test(s)) set('imkan',o); });
+  // Refleksler
+  { const m=s.match(/(tehdit|menace)( refleksi)?\s+(var|pozitif|zayıf|yok|negatif|yapılmadı|bakılmadı)/);
+    if(m) set('tehdit',/var|pozitif/.test(m[3])?'Var':m[3]==='zayıf'?'Zayıf':/yapılmadı|bakılmadı/.test(m[3])?NA:'Yok'); }
+  { const m=s.match(/(ışık refleksi|pupilla refleksi|pupil refleksi|pupiller refleks|direkt refleks|pır)\S*\s+(var|pozitif|zayıf|yavaş|yok|negatif|yapılmadı|bakılmadı)/);
+    if(m) set('pir',/var|pozitif/.test(m[2])?'Var':/zayıf|yavaş/.test(m[2])?'Zayıf':/yapılmadı|bakılmadı/.test(m[2])?NA:'Yok'); }
+  if(/midriyaz|midriatik|pupil\S*\s+(geniş|büyük|dilate)/.test(s)) set('pupil','Midriyazis');
+  else if(/miyoz|pupil\S*\s+(küçük|dar)/.test(s)) set('pupil','Miyozis');
+  else if(/anizokori/.test(s)) set('pupil','Anizokori');
+  else if(/pupil\S*\s+normal/.test(s)) set('pupil','Normal');
+  // Ağrı, akıntı tipi
+  { const m=s.match(/(ağrı|blefarospazm)\S*\s+(var|yok)/); if(m) set('agri',m[2]==='var'?'Var':'Yok'); else if(/blefarospazm/.test(s)) set('agri','Var'); }
+  if(/pürülan|irinli|cerahat/.test(s)) set('akinti','Pürülan'); else if(/mukoid|mukus/.test(s)) set('akinti','Mukoid'); else if(/kanlı akıntı/.test(s)) set('akinti','Kanlı'); else if(/seröz|sulu akıntı/.test(s)) set('akinti','Seröz');
+  // Kapak, konjunktiva, kornea, ön kamara, iris/lens
+  [[/entropion/,'kapak','Entropion'],[/ektropion/,'kapak','Ektropion'],[/(üçüncü|3)\s*(göz )?kapa/,'kapak','3. kapak protrüzyonu'],[/kapa\S*\s+(\S+\s)?(kitle|şiş)/,'kapak','Şişlik / kitle'],[/lagoftalm|kapak\S* kapanmıyor/,'kapak','Kapak kapanmıyor'],
+   [/hiperemi/,'konj','Hiperemi'],[/kemozis/,'konj','Kemozis'],[/episkleral/,'konj','Episkleral konjesyon'],[/(subkonjonktival|konjonktival) kanama/,'konj','Kanama'],
+   [/ödem|mavi bulanık/,'kornea','Ödem / mavi bulanıklık'],[/damarlanma|neovaskülar|vaskülarizasyon/,'kornea','Damarlanma'],[/pigment/,'kornea','Pigmentasyon'],[/ülser/,'kornea','Ülser görünümü'],[/melting|erime/,'kornea','Erime (melting)'],[/sekestr|siyah plak/,'kornea','Siyah plak'],[/yabancı cisim/,'kornea','Yabancı cisim'],[/kornea\S*\s+(saydam|berrak|temiz)/,'kornea','Saydam'],
+   [/hifema/,'onkamara','Hifema'],[/hipopiyon/,'onkamara','Hipopiyon'],[/flare|ön kamara\S* bulanık/,'onkamara','Bulanık (flare)'],[/lens\S* ön kamara|anterior l[uü]ksasyon/,'onkamara','Lens ön kamarada'],
+   [/iris\S*\s+(\S+\s)?renk|renk değiş/,'iris','İris renk değişimi'],[/iris\S*\s+(\S+\s)?kitle/,'iris','İris kitle'],[/katarakt/,'iris','Katarakt'],[/l[uü]ksasyon|subl[uü]ksasyon|lens\S* yer değiştir/,'iris','Lens yer değiştirmiş']]
+    .forEach(([re,id,o])=>each(s,re,(m,neg)=>{ if(id==='iris'&&o==='Lens yer değiştirmiş'&&/ön kamara|anterior/.test(s)) return; if(/burun|burn|dudak|ağz|ağı|deri|tüy|kapa/.test(s.slice(Math.max(0,m.index-14),m.index))&&id==='kornea') return; add(id,o,neg); }));
+  // Floresein
+  { const m=s.match(/floresein\S*\s+(\S+)(\s\S+)?/);
+    if(m){ const w=m[1]+(m[2]||'');
+      if(/pozitif|boyandı|boya tuttu|tuttu|boyanma var/.test(w)) set('flor','Pozitif');
+      else if(/negatif|boyanmadı|tutmadı|boyanma yok/.test(w)) set('flor','Negatif');
+      else if(/yapılmadı|yapmadım|yok|bakılmadı/.test(w)) set('flor',NA); } }
+  // Schirmer ve GİB (sağ/sol)
+  const STOP=/schirmer|şirmer|floresein|g[iı]b\b|g[iı]p\b|göz içi|tonometri|tansiyon|kan basıncı|fundus|kornea|mukoza|ağrı|pupil|tehdit/;
+  const pair=(id,kw)=>{ const m=s.match(kw); if(!m) return; let seg=s.slice(m.index+m[0].length, m.index+m[0].length+48); const cut=seg.slice(1).search(STOP); if(cut>=0) seg=seg.slice(0,cut+1);
+    if(NOTDONE.test(seg)&&!/\d/.test(seg)) return setPair(id,null,null,true);
+    const r=seg.match(/sağ\S*\s+(\d+(?:,\d+)?)/), l=seg.match(/sol\S*\s+(\d+(?:,\d+)?)/);
+    if(r||l) return setPair(id,r&&r[1],l&&l[1]);
+    const n=(seg.match(/\d+(?:,\d+)?/g)||[]); if(n.length>=2) return setPair(id,n[0],n[1]);
+    if(n.length===1){ if(st.goz==='Sol') return setPair(id,null,n[0]); if(st.goz==='Sağ') return setPair(id,n[0],null); return setPair(id,n[0],n[0]); } };
+  pair('schirmer',/schirmer|şirmer|şimer/); pair('gib',/g[iı]b\b|g\s[iı]\s?b\b|g[iı]p\b|göz içi bas\S*|tonometri/);
+  if(has('imkan','Tonometre')&&!pr.gib.r&&!pr.gib.l) setPair('gib',null,null,true);
+  if(has('imkan','Floresein')&&!st.flor) set('flor',NA);
+  // Fundus
+  { const m=s.match(/fundus\S*\s+(normal|anormal|görülemedi|görülmedi|bakılmadı|yapılmadı|bakamadım)/);
+    if(m) set('fundus',m[1]==='normal'?'Normal':m[1]==='anormal'?'Anormal':/bakılmadı|yapılmadı|bakamadım/.test(m[1])?NA:'Görülemedi');
+    const a=s.match(/retina\S*\s+(dekolman|ayrıl|kanama)\S*|retinal kanama/); if(a){ set('fundus','Anormal'); tx.fundus=a[0].trim(); sync('fundus'); } }
+  // Gözün dışında
+  if(/gözün dışı\S* normal/.test(s)) set('gozdisi','Normal');
+  [[/bur(u)?n\S*\s+(\S+\s)?(lezyon|yara|kabuk|ülser|kızarık|kanama)/,'Burun lezyonu'],[/(dudak|ağız)\S*\s+(\S+\s)?(lezyon|yara|ülser)/,'Ağız / dudak lezyonu'],[/(deri|tüy)\S*\s+(\S+\s)?(lezyon|yara|dökül|kayb)|alopesi/,'Deri lezyonu / tüy kaybı'],[/yüz\S*\s+(\S+\s)?şiş/,'Yüzde şişlik'],[/lenf/,'Lenf nodu büyük']]
+    .forEach(([re,o])=>each(s,re,(m,neg)=>add('gozdisi',o,neg)));
+  // Mukoza, tansiyon, kan testi
+  if(/peteşi|ekimoz/.test(s)) set('mukoza','Peteşi / ekimoz'); else if(/ikter|sarı mukoza|mukoza\S* sarı/.test(s)) set('mukoza','Sarı (ikterik)'); else if(/mukoza\S*\s+(\S+\s)?soluk|soluk mukoza/.test(s)) set('mukoza','Soluk'); else if(/mukoza\S*\s+(normal|pembe)/.test(s)) set('mukoza','Normal');
+  { const m=s.match(/(tansiyon|kan basıncı|sistolik)\S*\s+(?:\S+\s+){0,2}?(\d{2,3})/);
+    if(m){ pr.tansiyon.v=m[2]; pr.tansiyon.na=false; sync('tansiyon'); hit.add('tansiyon'); done.push('Sistolik kan basıncı: '+m[2]+' mmHg'); }
+    else if(/(tansiyon|kan basıncı)\S*\s+(ölçülmedi|ölçmedim|yok|ölçemedim)/.test(s)){ pr.tansiyon.na=true; sync('tansiyon'); hit.add('tansiyon'); done.push('Sistolik kan basıncı: '+NA); } }
+  { const m=s.match(/(kan testi|hemogram|biyokimya)\S*\s+(yapıldı|normal|yapılmadı|yok|yapmadım)/); if(m) set('kan',/yapıldı|normal/.test(m[2])?'Yapıldı':NA); }
+
+  return {done,hit:[...hit],komut:/ hazırla\S*\s*$/.test(s)};
+}
+
+/* Mikrofon arayüzü */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let REC=null, SES='', SES_ARA='';
+function sesPanel(html){ let p=$('#ses'); if(!p){ p=el('div','ses'); p.id='ses'; document.body.appendChild(p); } p.innerHTML=html; p.hidden=false; return p; }
+function sesKapat(){ const p=$('#ses'); if(p) p.hidden=true; }
+function sesBaslat(){
+  if(!SR){ toast('Bu tarayıcı sesli girişi desteklemiyor. Chrome ya da Safari ile açın; yazı alanlarında klavyenin mikrofonunu kullanabilirsiniz.'); return; }
+  if(REC){ REC.stop(); return; }
+  SES=''; SES_ARA='';
+  const p=sesPanel(`<div class="ses-h"><span class="dot"></span><b>Dinliyorum</b></div>
+    <div class="ses-t" id="sesT">Konuşun…</div>
+    <div class="hint">Örnek: “Kedi, tekir, iki yaşında, dişi, sol göz, üç gündür kızarıklık ve akıntı, gözünü kısıyor, floresein pozitif, GİB sağ 18 sol 20, burunda yara var.” Sonunda “hazırla” derseniz metin de hazırlanır.</div>
+    <div class="hint">Ses, telefonunuzun ses tanıma hizmetiyle (Google ya da Apple) yazıya çevrilir. Sahip adı söylemeyin.</div>
+    <div class="ses-b"><button class="btn s" id="sesIptal" type="button">Vazgeç</button><button class="btn p" id="sesBitir" type="button">Bitir</button></div>`);
+  let iptal=false;
+  $('#sesIptal').onclick=()=>{ iptal=true; if(REC) REC.abort(); sesKapat(); };
+  $('#sesBitir').onclick=()=>{ if(REC) REC.stop(); };
+  REC=new SR(); REC.lang='tr-TR'; REC.continuous=true; REC.interimResults=true;
+  REC.onresult=e=>{ let fin='',ara=''; for(let i=0;i<e.results.length;i++){ const r=e.results[i]; if(r.isFinal) fin+=r[0].transcript+' '; else ara+=r[0].transcript+' '; } SES=fin; SES_ARA=ara; const t=$('#sesT'); if(t) t.textContent=(fin+ara).trim()||'Konuşun…'; };
+  REC.onerror=e=>{ if(e.error==='not-allowed'||e.error==='service-not-allowed') toast('Mikrofon izni verilmedi. Tarayıcı ayarlarından izin verin.'); else if(e.error==='no-speech') toast('Ses duyulmadı; tekrar deneyin.'); else if(e.error!=='aborted') toast('Ses tanınamadı: '+e.error); };
+  REC.onend=()=>{ REC=null; const mic=$('#mic'); if(mic) mic.classList.remove('rec'); if(iptal) return; const t=(SES+' '+SES_ARA).trim(); if(!t){ sesKapat(); return; } sesSonuc(t); };
+  try{ REC.start(); const mic=$('#mic'); if(mic) mic.classList.add('rec'); }catch(e){ REC=null; toast('Mikrofon başlatılamadı'); sesKapat(); }
+}
+function sesSonuc(t){
+  const r=sesCoz(t);
+  r.hit.forEach(id=>{ const b=UI[id]&&(UI[id].ch||UI[id].inp||UI[id].na); const box=b&&b.closest('.f'); if(box){ box.classList.remove('flash'); void box.offsetWidth; box.classList.add('flash'); } });
+  sesPanel(`<div class="ses-h"><b>${r.done.length?`${r.done.length} bulgu işaretlendi`:'Bir şey işaretlenemedi'}</b></div>
+    <div class="ses-t">“${t.replace(/[<>&]/g,'')}”</div>
+    ${r.done.length?`<ul class="ses-l">${r.done.map(x=>`<li>${x.replace(/[<>&]/g,'')}</li>`).join('')}</ul>`:''}
+    <div class="hint">İşaretlenenler formda vurgulandı; göndermeden önce kontrol edin.</div>
+    <div class="ses-b"><button class="btn s" id="sesEk" type="button">Konuşmayı ek öyküye ekle</button><button class="btn p" id="sesTamam" type="button">${r.komut?'Hazırla →':'Tamam'}</button></div>`);
+  $('#sesEk').onclick=()=>{ tx.ek=(tx.ek?tx.ek+'; ':'')+'Hekimin sesli notu: '+t; sync('ek'); toast('Ek öyküye eklendi'); $('#sesEk').disabled=true; };
+  $('#sesTamam').onclick=()=>{ sesKapat(); if(r.komut) hazirla(); };
+}
+
+restoreBar();
 </script>
 
 </body>
