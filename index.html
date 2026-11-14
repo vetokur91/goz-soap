@@ -584,19 +584,33 @@ function norm(t){
   s=sayilar(s);
   return ' '+s+' ';
 }
-const NEG=/^\s*(?:\S+\s+)?(yok|yoktu|değil|olmadan|görülmedi|görmedim|saptanmadı)\b/;
+const NEG=/^\s*(?:\S+\s+)?(yok|yoktu|değil|olmadan|görülmedi|görmedim|saptanmadı)(?=\s|$)/;
 function each(s,re,fn){ const g=new RegExp(re.source,'g'+(re.flags.includes('i')?'i':'')); let m; while((m=g.exec(s))){ const after=s.slice(m.index+m[0].length,m.index+m[0].length+22); fn(m,NEG.test(after)); if(m[0]==='') g.lastIndex++; } }
 const DRUGS=[['antibiyotik','antibiyotik'],['steroid','steroid'],['kortizon','kortizon'],['deksametazon','deksametazon'],['prednizolon','prednizolon'],['tobramisin','tobramisin'],['kloramfenikol','kloramfenikol'],['ofloksasin','ofloksasin'],['siklosporin','siklosporin'],['takrolimus','takrolimus'],['atropin','atropin'],['suni gözyaşı','suni gözyaşı'],['antiviral','antiviral'],['famsiklovir','famsiklovir'],['meloksikam','meloksikam'],['kombine','kombine damla'],['dorzolamid','dorzolamid'],['latanoprost','latanoprost'],['timolol','timolol']];
 const BREEDS=['tekir','van kedisi','ankara kedisi','british shorthair','british','scottish fold','scottish','iran kedisi','iran','siyam','sfenks','golden retriever','golden','labrador','pug','shih tzu','yorkshire','terrier','poodle','kaniş','kangal','cocker','husky','maltese','maltız','pekinez','chihuahua','fransız bulldog','bulldog','alman çoban','rottweiler','pomeranian','beagle','cavalier','boxer','doberman','malinois','akita','çivava'];
 function cap(x){ return x.split(' ').map(w=>w.charAt(0).toLocaleUpperCase('tr')+w.slice(1)).join(' '); }
 
+// Ses tanımanın farklı yazımlarını tek biçime indir (ör. florescein, fluoresein, floresan → floresein)
+const CANON=[
+  [/(?<=\s)fl[uüoö]{0,2}r[eaiıöo]{1,2}s\S*/g,'floresein'], [/(?<=\s)boya testi\S*/g,'floresein'],
+  [/(?<=\s)göz içi bas[ıi]nc\S*|(?<=\s)göz tansiyon\S*|(?<=\s)tonometri\S*|(?<=\s)g\s?[iı]\s?[bp](?:['’]\S*)?(?=\s)/g,'gib'],
+  [/(?<=\s)göz dibi\S*|(?<=\s)fundus\S*/g,'fundus'],
+  [/(?<=\s)(schirmer|şirmer|şirmır|şırmer|şimer|şırmır|şermer|schrimer|şirmen)\S*|(?<=\s)gözyaşı testi\S*/g,'schirmer'],
+  [/(?<=\s)(pupil(la)?|pupiller|göz bebe\S*) ışık refleks\S*|(?<=\s)ışık refleks\S*|(?<=\s)plr(?=\s)|(?<=\s)direkt refleks\S*|(?<=\s)pupiller refleks\S*/g,'ışıkrefleksi'],
+  [/(?<=\s)(menace|menes|meneys|tehdit)( refleks\S*| test\S*)?/g,'tehdit'],
+  [/(?<=\s)göz bebe\S*|(?<=\s)pupil\S*/g,'pupil'],
+  [/(?<=\s)midr[iıy]+[ay]z\S*|(?<=\s)midri[ay]?t[iı]k\S*/g,'midriyazis'],
+  [/(?<=\s)m[iy]{1,2}oz\S*|(?<=\s)miyot[iı]k\S*/g,'miyozis'],
+  [/(?<=\s)kornea\S*/g,'kornea']
+];
+function canon(s){ CANON.forEach(([re,v])=>{ s=s.replace(re,v); }); return s; }
 function sesCoz(raw){
-  const s=norm(raw), done=[], hit=new Set();
+  const s=canon(norm(raw)), done=[], hit=new Set();
   const set=(id,o)=>{ if(!F(id)) return; pick(id,o,'set'); hit.add(id); done.push(`${F(id).l}: ${o}`); };
   const add=(id,o,neg)=>{ if(!neg) set(id,o); };
   const setTx=(id,v,lab)=>{ tx[id]=v; sync(id); hit.add(id); done.push(`${lab||F(id).l}: ${v}`); };
   const setPair=(id,r,l,na)=>{ const p=pr[id]; if(na){ p.na=true; } else { p.na=false; if(r!=null) p.r=r; if(l!=null) p.l=l; } sync(id); hit.add(id); done.push(`${F(id).l}: ${na?NA:`sağ ${p.r||'—'}, sol ${p.l||'—'}`}`); };
-  const NOTDONE=/(yapılmadı|yapmadım|yapamadım|ölçülmedi|ölçmedim|ölçemedim|bakılmadı|bakmadım|yok)\b/;
+  const NOTDONE=/(yapılmadı|yapmadım|yapamadım|ölçülmedi|ölçmedim|ölçemedim|bakılmadı|bakmadım|yok)(?=\s|$)/;
 
   // Tür
   { const k=s.search(/ kedi/), d=s.search(/ köpe[kğ]/); if(k>=0&&(d<0||k<d)) set('tur','Kedi'); else if(d>=0) set('tur','Köpek'); }
@@ -615,8 +629,9 @@ function sesCoz(raw){
   else if(/kısır\S*\s+(bilinmiyor|bilmiyor)/.test(s)) set('kisir','Bilinmiyor');
   else if(/kısır|kastre|steril/.test(s)) set('kisir','Evet');
   // Etkilenen göz
-  if(/(iki|2|her (iki|2)) göz|bilateral|(iki|2) taraflı/.test(s)) set('goz','İki göz');
-  else if(/ sağ göz/.test(s)) set('goz','Sağ'); else if(/ sol göz/.test(s)) set('goz','Sol');
+  { const s2=s.replace(/(gib|schirmer)[^,]{0,45}/g,' ');
+    if(/(iki|2|her (iki|2)) göz|bilateral|(iki|2) taraflı| sağ ve sol göz| sol ve sağ göz/.test(s2)) set('goz','İki göz');
+    else { const r=/ sağ göz/.test(s2), l=/ sol göz/.test(s2); if(r&&l) set('goz','İki göz'); else if(r) set('goz','Sağ'); else if(l) set('goz','Sol'); } }
   // Şikayet
   [[/kızarık/,'Kızarıklık'],[/(?<!burun )akıntı(?!sı)/,'Akıntı'],[/kısıyor|kısma|kısık/,'Gözü kısma'],[/sulan/,'Sulanma'],[/bulanık/,'Bulanıklık'],[/gözde kan|gözünde kan/,'Gözde kan'],[/şişlik|şişmiş|şiş /,'Şişlik'],[/fırla/,'Göz öne fırlamış'],[/görmüyor|görme kayb|kör /,'Görmüyor gibi'],[/kaşı/,'Gözünü kaşıyor']]
     .forEach(([re,o])=>each(s,re,(m,neg)=>{ if(/burun|burn|dudak|ağz|deri/.test(s.slice(Math.max(0,m.index-12),m.index))) return; add('sikayet',o,neg); }));
@@ -641,19 +656,19 @@ function sesCoz(raw){
   { const f=DRUGS.filter(([k])=>s.includes(k)).map(([,v])=>v); if(f.length){ const v=[...new Set(f)].join(', ')+(s.includes('damla')&&!f.some(x=>x.includes('damla'))?' (damla)':''); setTx('ilac', tx.ilac?tx.ilac+'; '+v:v); } }
 
   // Klinikte olmayanlar
-  [[/(tonometre|tonopen|tonovet)\S*\s+yok/,'Tonometre'],[/oftalmoskop\S*\s+yok/,'Oftalmoskop'],[/(biyomikroskop|slit lamp|büyüteç)\S*\s+yok/,'Biyomikroskop / büyüteç'],[/floresein\S*\s+yok/,'Floresein'],[/kan testi\S*\s+(yok|yapamıyoruz)/,'Kan testi']]
+  [[/(tonometre|tonopen|tonovet)\S*\s+yok/,'Tonometre'],[/oftalmoskop\S*\s+yok/,'Oftalmoskop'],[/(biyomikroskop|slit lamp|büyüteç)\S*\s+yok/,'Biyomikroskop / büyüteç'],[/floresein\S*\s+(yok|bitti|kalmadı)/,'Floresein'],[/kan testi\S*\s+(yok|yapamıyoruz)/,'Kan testi']]
     .forEach(([re,o])=>{ if(re.test(s)) set('imkan',o); });
   // Refleksler
-  { const m=s.match(/(tehdit|menace)( refleksi)?\s+(var|pozitif|zayıf|yok|negatif|yapılmadı|bakılmadı)/);
-    if(m) set('tehdit',/var|pozitif/.test(m[3])?'Var':m[3]==='zayıf'?'Zayıf':/yapılmadı|bakılmadı/.test(m[3])?NA:'Yok'); }
-  { const m=s.match(/(ışık refleksi|pupilla refleksi|pupil refleksi|pupiller refleks|direkt refleks|pır)\S*\s+(var|pozitif|zayıf|yavaş|yok|negatif|yapılmadı|bakılmadı)/);
-    if(m) set('pir',/var|pozitif/.test(m[2])?'Var':/zayıf|yavaş/.test(m[2])?'Zayıf':/yapılmadı|bakılmadı/.test(m[2])?NA:'Yok'); }
-  if(/midriyaz|midriatik|pupil\S*\s+(geniş|büyük|dilate)/.test(s)) set('pupil','Midriyazis');
-  else if(/miyoz|pupil\S*\s+(küçük|dar)/.test(s)) set('pupil','Miyozis');
-  else if(/anizokori/.test(s)) set('pupil','Anizokori');
-  else if(/pupil\S*\s+normal/.test(s)) set('pupil','Normal');
+  const DEGER=(w)=>/^(yapılmadı|yapmadım|bakılmadı|bakmadım|bakamadım|değerlendirilemedi)/.test(w)?NA:/^(var|pozitif|alındı|normal|artı)/.test(w)?'Var':/^(zayıf|azalmış|yavaş|şüpheli)/.test(w)?'Zayıf':/^(yok|negatif|alınamadı|eksi)/.test(w)?'Yok':null;
+  { const m=s.match(/tehdit\s+(?:(?:sağ|sol)\S*\s+)?(\S+)/); const v=m&&DEGER(m[1]); if(v) set('tehdit',v); }
+  { const m=s.match(/ışıkrefleksi\s+(?:(?:sağ|sol)\S*\s+)?(\S+)/); const v=m&&DEGER(m[1]); if(v) set('pir',v); }
+  if(/anizokori|pupil\S*\s+(farklı|eşit değil)/.test(s)) set('pupil','Anizokori');
+  else if(/midriyazis|pupil\s+(\S+\s)?(geniş|büyük|dilate|açık)/.test(s)) set('pupil','Midriyazis');
+  else if(/miyozis|pupil\s+(\S+\s)?(küçük|dar|nokta)/.test(s)) set('pupil','Miyozis');
+  else if(/pupil\s+(\S+\s)?(normal|eşit)/.test(s)) set('pupil','Normal');
+  else if(/pupil\s+(\S+\s)?(değerlendirilemedi|bakılmadı|görülemedi)/.test(s)) set('pupil','Değerlendirilemedi');
   // Ağrı, akıntı tipi
-  { const m=s.match(/(ağrı|blefarospazm)\S*\s+(var|yok)/); if(m) set('agri',m[2]==='var'?'Var':'Yok'); else if(/blefarospazm/.test(s)) set('agri','Var'); }
+  { const m=s.match(/(ağrı|blefarospazm)\S*\s+(var|yok)/); if(m) set('agri',m[2]==='var'?'Var':'Yok'); else if(/ağrısız/.test(s)) set('agri','Yok'); else if(/blefarospazm|ağrılı|gözünü açamıyor/.test(s)) set('agri','Var'); }
   if(/pürülan|irinli|cerahat/.test(s)) set('akinti','Pürülan'); else if(/mukoid|mukus/.test(s)) set('akinti','Mukoid'); else if(/kanlı akıntı/.test(s)) set('akinti','Kanlı'); else if(/seröz|sulu akıntı/.test(s)) set('akinti','Seröz');
   // Kapak, konjunktiva, kornea, ön kamara, iris/lens
   [[/entropion/,'kapak','Entropion'],[/ektropion/,'kapak','Ektropion'],[/(üçüncü|3)\s*(göz )?kapa/,'kapak','3. kapak protrüzyonu'],[/kapa\S*\s+(\S+\s)?(kitle|şiş)/,'kapak','Şişlik / kitle'],[/lagoftalm|kapak\S* kapanmıyor/,'kapak','Kapak kapanmıyor'],
@@ -663,25 +678,25 @@ function sesCoz(raw){
    [/iris\S*\s+(\S+\s)?renk|renk değiş/,'iris','İris renk değişimi'],[/iris\S*\s+(\S+\s)?kitle/,'iris','İris kitle'],[/katarakt/,'iris','Katarakt'],[/l[uü]ksasyon|subl[uü]ksasyon|lens\S* yer değiştir/,'iris','Lens yer değiştirmiş']]
     .forEach(([re,id,o])=>each(s,re,(m,neg)=>{ if(id==='iris'&&o==='Lens yer değiştirmiş'&&/ön kamara|anterior/.test(s)) return; if(/burun|burn|dudak|ağz|ağı|deri|tüy|kapa/.test(s.slice(Math.max(0,m.index-14),m.index))&&id==='kornea') return; add(id,o,neg); }));
   // Floresein
-  { const m=s.match(/floresein\S*\s+(\S+)(\s\S+)?/);
-    if(m){ const w=m[1]+(m[2]||'');
-      if(/pozitif|boyandı|boya tuttu|tuttu|boyanma var/.test(w)) set('flor','Pozitif');
-      else if(/negatif|boyanmadı|tutmadı|boyanma yok/.test(w)) set('flor','Negatif');
-      else if(/yapılmadı|yapmadım|yok|bakılmadı/.test(w)) set('flor',NA); } }
+  { const m=s.match(/floresein\S*((?:\s+\S+){1,3})/);
+    if(m){ const w=m[1];
+      if(/negatif|boyanmadı|tutmadı|boyanma yok|tutulum yok|eksi/.test(w)) set('flor','Negatif');
+      else if(/pozitif|boyandı|boyanıyor|boya tuttu|tuttu|boyanma var|tutulum var|artı/.test(w)) set('flor','Pozitif');
+      else if(/yapılmadı|yapmadım|yapamadım|bakılmadı|bakmadım|yok/.test(w)) set('flor',NA); } }
   // Schirmer ve GİB (sağ/sol)
-  const STOP=/schirmer|şirmer|floresein|g[iı]b\b|g[iı]p\b|göz içi|tonometri|tansiyon|kan basıncı|fundus|kornea|mukoza|ağrı|pupil|tehdit/;
+  const STOP=/schirmer|floresein|gib|tansiyon|kan basıncı|fundus|kornea|mukoza|ağrı|pupil|tehdit|ışıkrefleksi/;
   const pair=(id,kw)=>{ const m=s.match(kw); if(!m) return; let seg=s.slice(m.index+m[0].length, m.index+m[0].length+48); const cut=seg.slice(1).search(STOP); if(cut>=0) seg=seg.slice(0,cut+1);
     if(NOTDONE.test(seg)&&!/\d/.test(seg)) return setPair(id,null,null,true);
-    const r=seg.match(/sağ\S*\s+(\d+(?:,\d+)?)/), l=seg.match(/sol\S*\s+(\d+(?:,\d+)?)/);
+    const r=seg.match(/sağ\S*\s+(?:göz\S*\s+)?(\d+(?:,\d+)?)/), l=seg.match(/sol\S*\s+(?:göz\S*\s+)?(\d+(?:,\d+)?)/);
     if(r||l) return setPair(id,r&&r[1],l&&l[1]);
     const n=(seg.match(/\d+(?:,\d+)?/g)||[]); if(n.length>=2) return setPair(id,n[0],n[1]);
     if(n.length===1){ if(st.goz==='Sol') return setPair(id,null,n[0]); if(st.goz==='Sağ') return setPair(id,n[0],null); return setPair(id,n[0],n[0]); } };
-  pair('schirmer',/schirmer|şirmer|şimer/); pair('gib',/g[iı]b\b|g\s[iı]\s?b\b|g[iı]p\b|göz içi bas\S*|tonometri/);
+  pair('schirmer',/schirmer/); pair('gib',/gib/);
   if(has('imkan','Tonometre')&&!pr.gib.r&&!pr.gib.l) setPair('gib',null,null,true);
   if(has('imkan','Floresein')&&!st.flor) set('flor',NA);
   // Fundus
-  { const m=s.match(/fundus\S*\s+(normal|anormal|görülemedi|görülmedi|bakılmadı|yapılmadı|bakamadım)/);
-    if(m) set('fundus',m[1]==='normal'?'Normal':m[1]==='anormal'?'Anormal':/bakılmadı|yapılmadı|bakamadım/.test(m[1])?NA:'Görülemedi');
+  { const m=s.match(/fundus\S*\s+(?:\S+\s+)?(normal|anormal|görülemedi|görülmedi|bakılmadı|yapılmadı|bakamadım|bakmadım)/);
+    if(m) set('fundus',m[1]==='normal'?'Normal':m[1]==='anormal'?'Anormal':/bakılmadı|yapılmadı|bakamadım|bakmadım/.test(m[1])?NA:'Görülemedi');
     const a=s.match(/retina\S*\s+(dekolman|ayrıl|kanama)\S*|retinal kanama/); if(a){ set('fundus','Anormal'); tx.fundus=a[0].trim(); sync('fundus'); } }
   // Gözün dışında
   if(/gözün dışı\S* normal/.test(s)) set('gozdisi','Normal');
@@ -689,7 +704,7 @@ function sesCoz(raw){
     .forEach(([re,o])=>each(s,re,(m,neg)=>add('gozdisi',o,neg)));
   // Mukoza, tansiyon, kan testi
   if(/peteşi|ekimoz/.test(s)) set('mukoza','Peteşi / ekimoz'); else if(/ikter|sarı mukoza|mukoza\S* sarı/.test(s)) set('mukoza','Sarı (ikterik)'); else if(/mukoza\S*\s+(\S+\s)?soluk|soluk mukoza/.test(s)) set('mukoza','Soluk'); else if(/mukoza\S*\s+(normal|pembe)/.test(s)) set('mukoza','Normal');
-  { const m=s.match(/(tansiyon|kan basıncı|sistolik)\S*\s+(?:\S+\s+){0,2}?(\d{2,3})/);
+  { const m=s.match(/(tansiyon|kan basıncı|sistolik)\S*\s+(?:\S+\s+){0,2}?(\d{2,3})(?!\d)/);
     if(m){ pr.tansiyon.v=m[2]; pr.tansiyon.na=false; sync('tansiyon'); hit.add('tansiyon'); done.push('Sistolik kan basıncı: '+m[2]+' mmHg'); }
     else if(/(tansiyon|kan basıncı)\S*\s+(ölçülmedi|ölçmedim|yok|ölçemedim)/.test(s)){ pr.tansiyon.na=true; sync('tansiyon'); hit.add('tansiyon'); done.push('Sistolik kan basıncı: '+NA); } }
   { const m=s.match(/(kan testi|hemogram|biyokimya)\S*\s+(yapıldı|normal|yapılmadı|yok|yapmadım)/); if(m) set('kan',/yapıldı|normal/.test(m[2])?'Yapıldı':NA); }
