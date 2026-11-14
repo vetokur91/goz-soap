@@ -105,6 +105,7 @@ footer{margin-top:30px;font-size:12px;color:var(--mute);text-align:center}
 .ses .hint{font-size:12.5px;color:var(--mute);margin:6px 0}
 .ses-l{margin:6px 0;padding-left:18px;font-size:14px}
 .ses-b{display:flex;gap:8px;margin-top:10px}
+.ses-b .btn{min-width:0;padding:13px 10px;font-size:15px}
 .f.flash{animation:parla 2.2s ease-out}
 @keyframes parla{0%{background:var(--teal-soft)}100%{background:transparent}}
 @media (prefers-reduced-motion:reduce){.btn.mic.rec,.ses .dot,.f.flash{animation:none}}
@@ -610,8 +611,9 @@ function sesCoz(raw){
     if(y!=null){ set('yas', y<1?'<1 yıl':y<=7?'1–7 yıl':'>7 yıl'); tx.yas=lab; sync('yas'); } }
   // Cinsiyet, kısırlık
   if(/ dişi/.test(s)) set('cins','Dişi'); else if(/ erkek/.test(s)) set('cins','Erkek');
-  if(/kısır değil|kısırlaştırılmamış|kısırlaştırılmadı/.test(s)) set('kisir','Hayır');
-  else if(/ kısır|kastre|kısırlaştırıl/.test(s)) set('kisir','Evet');
+  if(/kısır(laştırılmış|laştırma|laştırılma)?\S*\s+(değil|hayır|yok|yapılmadı|yapılmamış)|kısırlaştırılmamış|kısırlaştırılmadı|kastre (değil|edilmemiş)|steril değil/.test(s)) set('kisir','Hayır');
+  else if(/kısır\S*\s+(bilinmiyor|bilmiyor)/.test(s)) set('kisir','Bilinmiyor');
+  else if(/kısır|kastre|steril/.test(s)) set('kisir','Evet');
   // Etkilenen göz
   if(/(iki|2|her (iki|2)) göz|bilateral|(iki|2) taraflı/.test(s)) set('goz','İki göz');
   else if(/ sağ göz/.test(s)) set('goz','Sağ'); else if(/ sol göz/.test(s)) set('goz','Sol');
@@ -697,37 +699,75 @@ function sesCoz(raw){
 
 /* Mikrofon arayüzü */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let REC=null, SES='', SES_ARA='';
+const KOMUT = /(?:^|\s)(hazırla|hazırlayın|hazırlar mısın|metni hazırla)(?:\s|$)/;
+let REC=null, OTURUM=0;
+const KISA = {tur:'tür', yas:'yaş', goz:'etkilenen göz', sikayet:'şikayet', sure:'süre', tehdit:'tehdit refleksi', pupil:'pupillalar', pir:'ışık refleksi', schirmer:'Schirmer', flor:'floresein', gib:'göz içi basıncı', fundus:'fundus'};
+function eksikler(){
+  const out=[];
+  ['tur','yas','goz','sikayet','sure'].forEach(id=>{ const v=st[id]; if(!v || (v instanceof Set && !v.size)) out.push(id); });
+  ['tehdit','pupil','pir','schirmer','flor','gib','fundus'].forEach(id=>{ const f=F(id); if(f.t==='pair'){ const p=pr[id]; if(!p.na && !p.r && !p.l) out.push(id); } else if(!st[id]) out.push(id); });
+  return out;
+}
+function soyle(metin){
+  try{ if(!window.speechSynthesis||!metin) return; speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(metin); u.lang='tr-TR'; const v=speechSynthesis.getVoices().find(x=>/^tr/i.test(x.lang)); if(v) u.voice=v; u.rate=1.05; speechSynthesis.speak(u); }catch(_){}
+}
+function liste(a){ return a.length<2 ? a.join('') : a.slice(0,-1).join(', ')+' ve '+a[a.length-1]; }
+function eksikSoz(E){ const a=E.slice(0,5); return E.length>5 ? a.join(', ')+' ve '+(E.length-5)+' bilgi daha' : liste(a); }
 function sesPanel(html){ let p=$('#ses'); if(!p){ p=el('div','ses'); p.id='ses'; document.body.appendChild(p); } p.innerHTML=html; p.hidden=false; return p; }
 function sesKapat(){ const p=$('#ses'); if(p) p.hidden=true; }
+function micDurum(on){ const mic=$('#mic'); if(mic) mic.classList.toggle('rec',!!on); }
 function sesBaslat(){
   if(!SR){ toast('Bu tarayıcı sesli girişi desteklemiyor. Chrome ya da Safari ile açın; yazı alanlarında klavyenin mikrofonunu kullanabilirsiniz.'); return; }
-  if(REC){ REC.stop(); return; }
-  SES=''; SES_ARA='';
-  const p=sesPanel(`<div class="ses-h"><span class="dot"></span><b>Dinliyorum</b></div>
+  if(REC && REC._dinliyor){ REC._bitir(false); return; }        // dinlerken mikrofona basmak = Bitir
+  if(REC){ try{ REC.onend=null; REC.onresult=null; REC.onerror=null; REC.abort(); }catch(_){} REC=null; }   // takılı kalmış eski oturumu temizle
+  try{ if(window.speechSynthesis){ speechSynthesis.cancel(); speechSynthesis.speak(new SpeechSynthesisUtterance('')); } }catch(_){}   // iPhone'da sesli yanıtın çalabilmesi için
+  const id=++OTURUM; let fin='', ara='', komut=false, bitti=false, iptal=false, yedek=null;
+  sesPanel(`<div class="ses-h"><span class="dot"></span><b>Dinliyorum</b></div>
     <div class="ses-t" id="sesT">Konuşun…</div>
-    <div class="hint">Örnek: “Kedi, tekir, iki yaşında, dişi, sol göz, üç gündür kızarıklık ve akıntı, gözünü kısıyor, floresein pozitif, GİB sağ 18 sol 20, burunda yara var.” Sonunda “hazırla” derseniz metin de hazırlanır.</div>
+    <div class="hint">Örnek: “Kedi, tekir, iki yaşında, dişi, kısır, sol göz, üç gündür kızarıklık ve akıntı, gözünü kısıyor, floresein pozitif, GİB sağ 18 sol 20, burunda yara var.” Sonunda <b>“hazırla”</b> derseniz metin kendiliğinden hazırlanır.</div>
     <div class="hint">Ses, telefonunuzun ses tanıma hizmetiyle (Google ya da Apple) yazıya çevrilir. Sahip adı söylemeyin.</div>
     <div class="ses-b"><button class="btn s" id="sesIptal" type="button">Vazgeç</button><button class="btn p" id="sesBitir" type="button">Bitir</button></div>`);
-  let iptal=false;
-  $('#sesIptal').onclick=()=>{ iptal=true; if(REC) REC.abort(); sesKapat(); };
-  $('#sesBitir').onclick=()=>{ if(REC) REC.stop(); };
-  REC=new SR(); REC.lang='tr-TR'; REC.continuous=true; REC.interimResults=true;
-  REC.onresult=e=>{ let fin='',ara=''; for(let i=0;i<e.results.length;i++){ const r=e.results[i]; if(r.isFinal) fin+=r[0].transcript+' '; else ara+=r[0].transcript+' '; } SES=fin; SES_ARA=ara; const t=$('#sesT'); if(t) t.textContent=(fin+ara).trim()||'Konuşun…'; };
-  REC.onerror=e=>{ if(e.error==='not-allowed'||e.error==='service-not-allowed') toast('Mikrofon izni verilmedi. Tarayıcı ayarlarından izin verin.'); else if(e.error==='no-speech') toast('Ses duyulmadı; tekrar deneyin.'); else if(e.error!=='aborted') toast('Ses tanınamadı: '+e.error); };
-  REC.onend=()=>{ REC=null; const mic=$('#mic'); if(mic) mic.classList.remove('rec'); if(iptal) return; const t=(SES+' '+SES_ARA).trim(); if(!t){ sesKapat(); return; } sesSonuc(t); };
-  try{ REC.start(); const mic=$('#mic'); if(mic) mic.classList.add('rec'); }catch(e){ REC=null; toast('Mikrofon başlatılamadı'); sesKapat(); }
+  const rec=new SR(); REC=rec; rec.lang='tr-TR'; rec.continuous=true; rec.interimResults=true; rec._dinliyor=true;
+  const sonlandir=()=>{ if(bitti) return; bitti=true; clearTimeout(yedek); rec._dinliyor=false; if(REC===rec) REC=null; micDurum(false);
+    if(iptal||id!==OTURUM) return;
+    let t=(fin+' '+ara).replace(/\s+/g,' ').trim();
+    if(KOMUT.test(' '+t.toLocaleLowerCase('tr')+' ')) komut=true;
+    t=t.replace(/\s*\b(metni\s+)?hazırla(yın| mısın)?\b\s*$/i,'').trim();
+    if(!t && !komut){ sesKapat(); toast('Ses duyulmadı; tekrar deneyin.'); return; }
+    sesSonuc(t,komut); };
+  rec._bitir=(k)=>{ if(k) komut=true; rec._dinliyor=false; try{ rec.stop(); }catch(_){} clearTimeout(yedek); yedek=setTimeout(()=>{ try{ rec.abort(); }catch(_){} sonlandir(); },1500); };
+  $('#sesIptal').onclick=()=>{ iptal=true; try{ rec.abort(); }catch(_){} sonlandir(); sesKapat(); };
+  $('#sesBitir').onclick=()=>rec._bitir(false);
+  rec.onresult=e=>{ let f='',a=''; for(let i=0;i<e.results.length;i++){ const r=e.results[i]; if(r.isFinal) f+=r[0].transcript+' '; else a+=r[0].transcript+' '; } fin=f; ara=a;
+    const tt=(f+a).trim(); const el_=$('#sesT'); if(el_) el_.textContent=tt||'Konuşun…';
+    if(rec._dinliyor && KOMUT.test(' '+tt.toLocaleLowerCase('tr')+' ')) rec._bitir(true); };
+  rec.onerror=e=>{ if(e.error==='not-allowed'||e.error==='service-not-allowed') toast('Mikrofon izni verilmedi. Tarayıcı ayarlarından izin verin.'); else if(e.error==='no-speech') toast('Ses duyulmadı; tekrar deneyin.'); else if(e.error!=='aborted') toast('Ses tanınamadı: '+e.error); };
+  rec.onend=sonlandir;
+  const basla=(deneme)=>{ try{ rec.start(); micDurum(true); }catch(e){ if(deneme<2) setTimeout(()=>basla(deneme+1),400); else { bitti=true; rec._dinliyor=false; if(REC===rec) REC=null; micDurum(false); toast('Mikrofon başlatılamadı; tekrar deneyin.'); sesKapat(); } } };
+  basla(0);
 }
-function sesSonuc(t){
-  const r=sesCoz(t);
+function sesSonuc(t,komut){
+  const r=t?sesCoz(t):{done:[],hit:[]};
   r.hit.forEach(id=>{ const b=UI[id]&&(UI[id].ch||UI[id].inp||UI[id].na); const box=b&&b.closest('.f'); if(box){ box.classList.remove('flash'); void box.offsetWidth; box.classList.add('flash'); } });
-  sesPanel(`<div class="ses-h"><b>${r.done.length?`${r.done.length} bulgu işaretlendi`:'Bir şey işaretlenemedi'}</b></div>
-    <div class="ses-t">“${t.replace(/[<>&]/g,'')}”</div>
+  if(komut){
+    sesKapat();
+    if(!st.tur){ toast('Hazırlamak için en azından türü söyleyin'); soyle('Hazırlamak için en azından türü söyleyin.'); return; }
+    hazirla().then(()=>{ const K=kurallar().filter(x=>x.lvl==='c').map(x=>x.b); const E=eksikler().map(i=>KISA[i]);
+      soyle('Metin hazır.'+(K.length?' Dikkat: '+K.join('. ')+'.':'')+(E.length?' Eksik: '+eksikSoz(E)+'.':'')+' Göndermek için gönder düğmesine basın.'); });
+    return;
+  }
+  const E=eksikler(), EK=E.map(i=>KISA[i]);
+  sesPanel(`<div class="ses-h"><b>${r.done.length?`${r.done.length} bilgi işaretlendi`:'Bir şey işaretlenemedi'}</b></div>
+    ${t?`<div class="ses-t">“${t.replace(/[<>&]/g,'')}”</div>`:''}
     ${r.done.length?`<ul class="ses-l">${r.done.map(x=>`<li>${x.replace(/[<>&]/g,'')}</li>`).join('')}</ul>`:''}
-    <div class="hint">İşaretlenenler formda vurgulandı; göndermeden önce kontrol edin.</div>
-    <div class="ses-b"><button class="btn s" id="sesEk" type="button">Konuşmayı ek öyküye ekle</button><button class="btn p" id="sesTamam" type="button">${r.komut?'Hazırla →':'Tamam'}</button></div>`);
-  $('#sesEk').onclick=()=>{ tx.ek=(tx.ek?tx.ek+'; ':'')+'Hekimin sesli notu: '+t; sync('ek'); toast('Ek öyküye eklendi'); $('#sesEk').disabled=true; };
-  $('#sesTamam').onclick=()=>{ sesKapat(); if(r.komut) hazirla(); };
+    ${E.length?`<div class="rule w" style="margin:8px 0"><b>⚠️ Eksik bilgiler</b>${EK.join(', ')}. Yapmadığınız test için “floresein yapılmadı” gibi söyleyebilirsiniz.</div>`:`<div class="ok" style="margin:8px 0">✓ Temel bilgilerin hepsi var.</div>`}
+    <div class="ses-b"><button class="btn s" id="sesDevam" type="button">🎤 ${E.length?'Eksikleri söyle':'Devam et'}</button><button class="btn p" id="sesHazir" type="button">Hazırla →</button></div>
+    <div class="ses-b"><button class="btn s" id="sesEk" type="button">Ek öyküye ekle</button><button class="btn s" id="sesTamam" type="button">Kapat</button></div>`);
+  soyle((r.done.length?r.done.length+' bilgi işaretlendi. ':'Bir şey işaretlenemedi. ')+(E.length?'Eksik: '+eksikSoz(EK)+'.':'Temel bilgilerin hepsi var. Hazırla diyebilirsiniz.'));
+  $('#sesDevam').onclick=()=>{ try{speechSynthesis.cancel();}catch(_){} sesBaslat(); };
+  $('#sesHazir').onclick=()=>{ try{speechSynthesis.cancel();}catch(_){} sesKapat(); hazirla(); };
+  $('#sesEk').onclick=()=>{ if(!t) return; tx.ek=(tx.ek?tx.ek+'; ':'')+'Hekimin sesli notu: '+t; sync('ek'); toast('Ek öyküye eklendi'); $('#sesEk').disabled=true; };
+  $('#sesTamam').onclick=()=>{ try{speechSynthesis.cancel();}catch(_){} sesKapat(); };
 }
 
 restoreBar();
